@@ -8,6 +8,11 @@
     "ecmaVersion": 2015,
     "sourceType": "module"
   },
+  "env": {
+    "node": true,
+    "mocha": true,
+    "jasmine": true
+  },
   "rules":{
     "class-methods-use-this":"off",
     "lines-between-class-members":"off"
