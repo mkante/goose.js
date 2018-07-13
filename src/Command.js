@@ -1,5 +1,6 @@
 import Path from 'path';
 import FileUtils from './utils/FileUtils';
+import { makeDDLName } from './utils/Helpers';
 import out from './utils/Out';
 
 export default class {
@@ -9,7 +10,8 @@ export default class {
 
   /**
    * Initialize a new project
-   * @returns {Promise<void>}
+   * @param format
+   * @returns {Promise<*>}
    */
   async init(format = 'json') {
     const {
@@ -36,5 +38,23 @@ export default class {
     }
     out.print('Complete.');
     return Promise.resolve();
+  }
+
+  /**
+   * Create migration file
+   * @param name
+   * @returns {Promise<void>}
+   */
+  async create(name) {
+    const { homeDir } = this.config;
+    const newMigrationName = makeDDLName(name);
+    const dir = Path.join(homeDir, newMigrationName);
+    const upTemplate = '// Add migration UP SQL statements.';
+    const downTemplate = '// Add rollback SQL statements.';
+    FileUtils.mkdir(dir);
+    FileUtils.put(`${dir}/up.sql`, upTemplate);
+    FileUtils.put(`${dir}/down.sql`, downTemplate);
+    out.print(`New migration create: ${newMigrationName}`);
+    return dir;
   }
 }
