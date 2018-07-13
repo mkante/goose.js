@@ -1,4 +1,5 @@
 import fs from 'fs';
+import extraFS from 'fs-extra';
 import Path from 'path';
 import _ from 'lodash';
 import Logger from './Logger';
@@ -49,5 +50,36 @@ export default {
       log.error(e.message, e);
     }
     return list;
+  },
+  /*
+  rm: function f(path) {
+    let bool = false;
+    if (!path) {
+      return bool;
+    }
+    try {
+      fs.unlinkSync(path);
+      bool = true;
+    } catch (e) {
+      log.error(e);
+    }
+    return bool;
+  },
+  */
+  put: function f(path, content) {
+    return fs.writeFileSync(path, content);
+  },
+  mkdir: function f(path, mode) {
+    try {
+      fs.mkdirSync(path, mode);
+    } catch (e) {
+      log.error(e);
+    }
+  },
+  cp: async function f(src, desc) {
+    return extraFS.copySync(src, desc);
+  },
+  mkdtemp: function f(prefix, mode) {
+    return fs.mkdtempSync(prefix, mode);
   },
 };

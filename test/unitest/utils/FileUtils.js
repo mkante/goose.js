@@ -64,4 +64,12 @@ describe(__filename, () => {
       });
     });
   });
+  /*
+  describe('#rm', () => {
+    it('Delete path file', () => {
+      assert.isTrue(!FileUtils.exists('dummy_file'));
+      assert.isFalse(FileUtils.rm('dummy_file'));
+    });
+  });
+  */
 });

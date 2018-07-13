@@ -1,21 +1,25 @@
 import chalk from 'chalk';
 
-const { log: out } = console;
+const { log } = console;
 
 const debug = (...args) => {
-  out.apply(console, ['DEBUG: '] + args);
+  log(['DEBUG: '] + args);
+};
+
+const print = (...args) => {
+  log.apply(console, args);
 };
 
 const warn = (...args) => {
-  out(chalk.yellow(['WARN: '] + args));
+  log(chalk.yellow(['WARN: '] + args));
 };
 
 const info = (...args) => {
-  out.apply(console, ['INFO:'] + args);
+  log(['INFO: '] + args);
 };
 
 const error = (...args) => {
-  out(chalk.red(['ERROR: '] + args));
+  log(chalk.red(['ERROR: '] + args));
 };
 
 export default {
@@ -23,4 +27,5 @@ export default {
   warn,
   error,
   info,
+  print,
 };

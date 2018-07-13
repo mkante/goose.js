@@ -1,6 +1,8 @@
 import _ from 'lodash';
-import FileUtils from './utils/FileUtils';
 import readYaml from 'read-yaml';
+import YAML from 'json2yaml';
+import Path from 'path';
+import FileUtils from './utils/FileUtils';
 import Out from './utils/Out';
 
 const jsonConfigTemplate = {
@@ -39,10 +41,13 @@ export default class {
     };
   }
   get templateDir() {
-    return [__dirname, '../template'].join();
+    return Path.join(__dirname, '../template');
   }
   get templateConfig() {
     return JSON.stringify(jsonConfigTemplate, null, 2);
+  }
+  get templateConfigYAML() {
+    return YAML.stringify(jsonConfigTemplate);
   }
   get defaultMigrationTable() {
     return _.get(this.environments, 'default_migration_table', null);
