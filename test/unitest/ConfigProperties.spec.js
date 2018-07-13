@@ -1,6 +1,8 @@
 import { assert } from 'chai';
 import ConfigProps from '../../src/ConfigProperties';
-// import Log from '../src/utils/Log';
+import Logger from '../../src/utils/Logger';
+
+const log = Logger(__filename);
 
 describe(__filename, () => {
   describe('Constructor', () => {
@@ -19,7 +21,7 @@ describe(__filename, () => {
     const f2 = `${__dirname}/../resources/config1.json`;
     const f3 = `${__dirname}/../resources/config1.yml`;
     const f4 = `${__dirname}/../resources/config1.js`;
-    const badJson = `${__dirname}/../resources/bad-config1.js`;
+    const badJson = `${__dirname}/../resources/bad-config1.json`;
 
     it(f1, async () => {
       const data = await ConfigProps.readFile(f1);
@@ -42,7 +44,8 @@ describe(__filename, () => {
         await ConfigProps.readFile(badJson);
         assert.fail('Should throw error');
       } catch (e) {
-        assert.isOk(/module/.test(e.message));
+        log.error(e.message);
+        assert.isOk(/Unexpected token/.test(e.message));
       }
     });
   });

@@ -1,7 +1,29 @@
 import _ from 'lodash';
-import fileExists from 'file-exists';
+import FileUtils from './utils/FileUtils';
 import readYaml from 'read-yaml';
-import Log from './utils/Log';
+import Out from './utils/Out';
+
+const jsonConfigTemplate = {
+  environments: {
+    default_migration_table: 'goose_migrations',
+    default_database: 'development',
+    development: {
+      adapter: 'mysql',
+      host: 'localhost',
+      // name: 'production_db',
+      user: 'root',
+      pass: '',
+      port: 3306,
+      charset: 'utf8',
+      // collation: 'utf8_unicode_ci',
+    },
+  },
+  paths: {
+    migrations: 'db/migrations',
+    seeds: 'db/seeds',
+  },
+};
+
 
 export default class {
   constructor(params) {
@@ -9,12 +31,18 @@ export default class {
     this.environments = _.get(params, 'environments', {});
     this.environments.default_migration_table = _.get(params,
       'environments.default_migration_table',
-      'goose_migrations');
+      jsonConfigTemplate.environments.default_migration_table);
 
     this.paths = {
       migrations: _.get(params, 'paths.migrations', 'db/migrations'),
       seeds: _.get(params, 'paths.seeds', 'db/seeds'),
     };
+  }
+  get templateDir() {
+    return [__dirname, '../template'].join();
+  }
+  get templateConfig() {
+    return JSON.stringify(jsonConfigTemplate, null, 2);
   }
   get defaultMigrationTable() {
     return _.get(this.environments, 'default_migration_table', null);
@@ -30,10 +58,8 @@ export default class {
     return new this.constructor(data);
   }
   static async readFile(filePath) {
-    try {
-      await fileExists(filePath);
-    } catch (e) {
-      Log.warn(`Can't resolve config file: ${filePath}`);
+    if (!FileUtils.exists(filePath)) {
+      Out.warn(`Can't resolve config file: ${filePath}`);
       return null;
     }
 
@@ -46,7 +72,7 @@ export default class {
       // const text = fs.readFileSync(filePath, 'utf8');
       parsedObj = readYaml.sync(filePath);
     } else {
-      Log.warn(`Bad config file format, only json|yml are supported, found: ${filePath}`);
+      Out.warn(`Bad config file format, only json|yml are supported, found: ${filePath}`);
     }
     return parsedObj;
   }
