@@ -69,6 +69,10 @@ export default {
   put: function f(path, content) {
     return fs.writeFileSync(path, content);
   },
+  read: function f(path) {
+    const bytes = fs.readFileSync(path);
+    return `${bytes}`;
+  },
   mkdir: function f(path, mode) {
     try {
       fs.mkdirSync(path, mode);
