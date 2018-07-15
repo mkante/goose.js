@@ -57,4 +57,22 @@ export default class {
     out.print(`New migration create: ${newMigrationName}`);
     return dir;
   }
+
+  /**
+   * Create migration file
+   * @param name
+   * @returns {Promise<void>}
+   */
+  async status() {
+    const { homeDir } = this.config;
+    const newMigrationName = makeDDLName(name);
+    const dir = Path.join(homeDir, newMigrationName);
+    const upTemplate = '// Add migration UP SQL statements.';
+    const downTemplate = '// Add a SQL statements.';
+    FileUtils.mkdir(dir);
+    FileUtils.put(`${dir}/up.sql`, upTemplate);
+    FileUtils.put(`${dir}/down.sql`, downTemplate);
+    out.print(`New migration create: ${newMigrationName}`);
+    return dir;
+  }
 }

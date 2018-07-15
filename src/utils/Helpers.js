@@ -12,4 +12,13 @@ const makeDDLName = suffix => uniqScriptName('DDL', suffix);
 
 const makeSeedLName = suffix => uniqScriptName('SEED', suffix);
 
-export { makeDDLName, makeSeedLName };
+const migrationID = fullname => uniqScriptName('SEED', suffix);
+
+const isoFormat = date => dateformat(date, 'isoDateTime');
+
+export {
+  makeDDLName,
+  makeSeedLName,
+  migrationID,
+  isoFormat,
+};

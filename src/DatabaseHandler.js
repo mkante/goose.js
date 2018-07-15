@@ -3,6 +3,7 @@ import _ from 'lodash';
 import { DBInvalidProvider } from './Error';
 import Logger from './utils/Logger';
 import FileUtils from './utils/FileUtils';
+import { isoFormat } from './utils/Helpers';
 
 const log = Logger(__filename);
 
@@ -45,15 +46,6 @@ const getConnecionConfig = (provider, params) => {
   return map[provider];
 };
 
-const initializeTable = async function f(tableName) {
-  const exists = await this.tableExists(tableName);
-  if (exists) {
-    log.debug(`Table already exists ${tableName}`);
-    return null;
-  }
-  return this.createMigrationTable(tableName);
-};
-
 export default class Handler {
   /**
    * Create instance
@@ -70,7 +62,7 @@ export default class Handler {
     instance.config = getConnecionConfig(provider, params);
     instance.mTable = 'goose_migrations';
     instance.knex = knex(instance.config);
-    await initializeTable.bind(instance)(instance.mTable);
+    await instance.initializeTable();
     return instance;
   }
 
@@ -81,6 +73,16 @@ export default class Handler {
    */
   static validProvider(provider) {
     return /(mysql)|(sqlite)|(pgsql)/.test(`${provider}`.toLowerCase());
+  }
+
+  async initializeTable(tableNameOverride) {
+    const tableName = !tableNameOverride ? this.mTable : tableNameOverride;
+    const exists = await this.tableExists(tableName);
+    if (exists) {
+      log.debug(`Table already exists ${tableName}`);
+      return null;
+    }
+    return this.createMigrationTable(tableName);
   }
 
   get connection() {
@@ -118,7 +120,10 @@ export default class Handler {
    */
   async createMigrationTable(tableName) {
     return this.connection.createTable(tableName, (table) => {
-      table.string('file').notNullable();
+      table.integer('id').notNullable();
+      table.string('name').notNullable();
+      table.timestamp('start_time').notNullable();
+      table.timestamp('end_time').notNullable();
       table.timestamp('created_at')
         .defaultTo(this.knex.fn.now())
         .notNullable();
@@ -139,9 +144,10 @@ export default class Handler {
    */
   async allFiles() {
     return this.knex
-      .select('file', 'created_at')
-      .from(this.mTable)
-      .orderBy('created_at', 'desc');
+      .orderBy('id', 'desc')
+      .orderBy('name', 'desc')
+      .orderBy('created_at', 'desc')
+      .from(this.mTable);
   }
 
   /**
@@ -158,16 +164,24 @@ export default class Handler {
    * @param table
    * @returns {Promise<void>}
    */
-  async exec(name, filePath) {
+  async exec(id, filePath, name) {
     const file = name;
     const SQL = FileUtils.read(filePath);
     log.debug(`SQL file content: ${SQL}`);
+
     const lines = Handler.splitStatements(SQL);
+    const startTime = isoFormat(new Date());
     _.each(lines, async (line) => {
       await this.connection.raw(line);
     });
+    const endTime = isoFormat(new Date()); console.log(endTime);
 
-    await this.knex.insert({ file }).into(this.mTable);
+    await this.knex.insert({
+      id,
+      name,
+      start_time: startTime,
+      end_time: endTime,
+    }).into(this.mTable);
     return Promise.resolve(lines.length);
   }
 
