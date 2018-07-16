@@ -165,8 +165,9 @@ export default class Command {
       return [];
     }
     if (!cursorId) {
-      return array;
+      const item = _.first(array);
+      return item ? [item] : [];
     }
-    return _(array).filter(it => it.id <= cursorId).value();
+    return _(array).filter(it => (cursorId === 0) || (it.id <= cursorId)).value();
   }
 }

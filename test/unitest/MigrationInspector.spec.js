@@ -31,7 +31,7 @@ describe(__filename, () => {
       log.info(`Files: ${files}`);
       let upFile1 = getSqlUpFile('2018_06_15_1531703913460_DDL1');
       let downFile2 = getSqlDownFile('2018_06_15_1531703913460_DDL1');
-      assert.equal(2, files.length, '2 files found');
+      assert.equal(3, files.length, '3 files found');
       assert.equal(1531703913460, files[0].id);
       assert.equal('2018_06_15_1531703913460_DDL1', files[0].name);
       assert.equal(upFile1, files[0].sqlUpFile);
@@ -76,8 +76,9 @@ describe(__filename, () => {
 
       const files = await inspector.freshFiles();
       log.info(`Files: ${files}`);
-      assert.equal(1, files.length, '1 files found');
+      assert.equal(2, files.length, '2files found');
       assert.equal('2018_06_15_1531703956888_DDL2', files[0].name);
+      assert.equal('2018_07_16_1531756446923_DDL3', files[1].name);
       db.close();
     });
   });
