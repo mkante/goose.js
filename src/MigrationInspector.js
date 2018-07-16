@@ -29,14 +29,14 @@ export default class {
    * Returns cached migrations
    */
   async cachedFiles() {
-    const rows = await this.db.files();
+    const rows = await this.db.allFiles();
     return _(rows).map(it => it.name).value();
   }
 
   /**
    * Returns recent migrations
    */
-  async recentFiles() {
+  async freshFiles() {
     const cachedFiles = await this.cachedFiles();
     const localFiles = await this.localFiles();
     return _(localFiles).filter(it => !cachedFiles.includes(it)).value();

@@ -52,7 +52,8 @@ export default class Handler {
    * @param provider
    * @param params
    */
-  static async create(provider, params) {
+  static async create(params) {
+    const { provider } = params;
     if (!Handler.validProvider(provider)) {
       throw new DBInvalidProvider(`Wrong database provider ${provider}`);
     }
@@ -165,7 +166,6 @@ export default class Handler {
    * @returns {Promise<void>}
    */
   async exec(id, filePath, name) {
-    const file = name;
     const SQL = FileUtils.read(filePath);
     log.debug(`SQL file content: ${SQL}`);
 

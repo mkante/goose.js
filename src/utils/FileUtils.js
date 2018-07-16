@@ -44,11 +44,11 @@ export default {
     try {
       list = fs.readdirSync(path);
       // Append root path to files
-      if (fullPaths) {
-        list = _(list).filter(it => regex.test(it))
-          .map(it => Path.join(path, it))
-          .value();
-      }
+      list = _(list).filter(it => regex.test(it))
+        .map((it) => { // eslint-disable-line
+          return fullPaths ? Path.join(path, it) : it;
+        })
+        .value();
     } catch (e) {
       log.error(e.message, e);
     }

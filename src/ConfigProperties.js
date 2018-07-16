@@ -58,6 +58,9 @@ export default class {
   dbEnv(env) {
     return _.get(this.environments, env, null);
   }
+  get dbEnvDefault() {
+    return this.dbEnv(this.defaultDatabase);
+  }
   static async from(filePath) {
     const data = await this.readFile(filePath);
     return new this.constructor(data);

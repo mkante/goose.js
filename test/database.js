@@ -1,6 +1,7 @@
 
 module.exports = {
   mysql: {
+    provider: 'mysql',
     host: '127.0.0.1',
     user: 'test',
     pass: 'test',
@@ -8,6 +9,7 @@ module.exports = {
     database: 'goose_test',
   },
   pgsql: {
+    provider: 'pgsql',
     host: '127.0.0.1',
     user: 'test',
     pass: 'test',

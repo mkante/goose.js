@@ -17,7 +17,7 @@ describe(__filename, () => {
   });
   describe('#create', () => {
     it('New instance', async () => {
-      const obj = await DatabaseHandler.create('mysql', mysqlConfg);
+      const obj = await DatabaseHandler.create(mysqlConfg);
       log.info('config:', obj.config);
       assert.equal('mysql', obj.provider);
       assert.equal('127.0.0.1', obj.config.connection.host);
@@ -31,7 +31,7 @@ describe(__filename, () => {
   });
   describe('#exec', () => {
     it('Run migration file', async () => {
-      const obj = await DatabaseHandler.create('mysql', mysqlConfg);
+      const obj = await DatabaseHandler.create(mysqlConfg);
       await obj.dropTableIfExists('goose_migrations');
       await obj.initializeTable();
       await obj.dropTableIfExists('users');
