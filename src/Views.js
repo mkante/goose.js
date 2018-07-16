@@ -32,17 +32,17 @@ export default {
     out.print('');
     _.each(files, (it) => {
       let formatedDate = '-';
-      let status = '-';
+      let mStatus = '-';
       const mId = it.id;
       const mName = it.name;
       if (it.date) {
         formatedDate = dateformat(it.date, 'yyyy-mm-dd h:MM:ss');
-        status = 'up';
+        mStatus = it.status;
       }
 
       out.print(
         column('', C1),
-        column(status, C2),
+        column(mStatus, C2),
         column(mId, C3),
         column(formatedDate, C4),
         column(mName),

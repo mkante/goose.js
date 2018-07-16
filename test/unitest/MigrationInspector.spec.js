@@ -4,7 +4,7 @@ import Logger from '../../src/utils/Logger';
 import DatabaseHandler from '../../src/DatabaseHandler';
 import Inspector from '../../src/MigrationInspector';
 import { mysql as mysqlConfg } from '../database';
-import { truncateMigration, resetMigration } from './Helpers';
+import { resetMigration } from './Helpers';
 
 const log = Logger(__filename);
 const migrationDir = Path.join('.', 'test', 'resources', 'db_migrations');
@@ -18,6 +18,11 @@ const createInspector = async () => {
 const migrateUp = async (id, name) => {
   const file = Path.join(migrationDir, name, 'up.sql');
   return db.merge(id, file, name);
+};
+
+const migrateDown = async (id, name) => {
+  const file = Path.join(migrationDir, name, 'down.sql');
+  return db.revert(id, file);
 };
 
 const getSqlUpFile = name => Path.join(migrationDir, name, 'up.sql');
@@ -78,6 +83,26 @@ describe(__filename, () => {
       assert.equal(2, files.length, '2files found');
       assert.equal('2018_06_15_1531703956888_DDL2', files[0].name);
       assert.equal('2018_07_16_1531756446923_DDL3', files[1].name);
+      db.close();
+    });
+  });
+
+  describe('#stagedFiles', () => {
+    it('Should returns 2 staged migrations', async () => {
+      const inspector = await createInspector();
+      await resetMigration(db);
+
+      await migrateUp(1531703913460, '2018_06_15_1531703913460_DDL1');
+
+      await migrateUp(1531756446923, '2018_07_16_1531756446923_DDL3');
+      await migrateDown(1531756446923, '2018_07_16_1531756446923_DDL3');
+
+      const files = await inspector.stagedFiles();
+      log.info('Files: ', files);
+      assert.equal(2, files.length, '2files found');
+      assert.equal('2018_06_15_1531703956888_DDL2', files[0].name);
+      assert.equal('2018_07_16_1531756446923_DDL3', files[1].name);
+      assert.equal('down', files[1].status);
       db.close();
     });
   });

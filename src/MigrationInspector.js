@@ -73,12 +73,35 @@ export default class {
   }
 
   /**
+   * Returns merged migrations
+   */
+  async mergedFiles() {
+    const rows = await this.cachedFiles();
+    return _(rows).filter(it => it.status === 'up').value();
+  }
+
+  /**
+   * Returns reverted migrations
+   */
+  async revertedFiles() {
+    const rows = await this.cachedFiles();
+    return _(rows).filter(it => it.status !== 'up').value();
+  }
+
+  /**
    * Returns files ready for migration
    */
   async stagedFiles() {
     const mergedFiles = await this.mergedFiles();
     const exclude = _(mergedFiles).map(it => it.name).value();
+
+    const revertedFiles = await this.revertedFiles();
     const localFiles = await this.localFiles();
-    return _(localFiles).filter(it => !exclude.includes(it.name)).value();
+
+    const group = revertedFiles.concat(localFiles);
+    return _(group).filter(it => !exclude.includes(it.name))
+      .uniqBy(it => it.id)
+      .sortBy(it => it.id)
+      .value();
   }
 }
