@@ -1,8 +1,8 @@
 import { assert } from 'chai';
 import Logger from '../../src/utils/Logger';
 import DatabaseHandler from '../../src/DatabaseHandler';
-import { mysql as mysqlConfg } from '../database';
 import { isoFormat } from '../../src/utils/Helpers';
+import { truncateMigration } from './Helpers';
 
 const log = Logger(__filename);
 const isoFormatRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
@@ -17,7 +17,7 @@ describe(__filename, () => {
   });
   describe('#create', () => {
     it('New instance', async () => {
-      const obj = await DatabaseHandler.create(mysqlConfg);
+      const obj = await truncateMigration();
       log.info('config:', obj.config);
       assert.equal('mysql', obj.provider);
       assert.equal('127.0.0.1', obj.config.connection.host);
@@ -31,13 +31,29 @@ describe(__filename, () => {
   });
   describe('#exec', () => {
     it('Run migration file', async () => {
-      const obj = await DatabaseHandler.create(mysqlConfg);
-      await obj.dropTableIfExists('goose_migrations');
-      await obj.initializeTable();
+      const obj = await truncateMigration();
       await obj.dropTableIfExists('users');
       log.info('Table user deleted');
 
-      await obj.exec(10, './test/resources/create-user-1.sql', 'bird1');
+      await obj.exec('./test/resources/create-user-1.sql');
+
+      const users = await obj.knex.select()
+        .orderBy('id', 'asc')
+        .from('users');
+
+      assert.equal(2, users.length, 'user rows size == 2');
+      assert.equal('Jackie Jan', users[0].name);
+      assert.equal('Bruce lee', users[1].name);
+      obj.close();
+    });
+  });
+  describe('#merge', () => {
+    it('Run migration file', async () => {
+      const obj = await truncateMigration();
+      await obj.dropTableIfExists('users');
+      log.info('Table user deleted');
+
+      await obj.merge(10, './test/resources/create-user-1.sql', 'bird1');
       const files = await obj.allFiles();
       assert.isTrue(await obj.tableExists('users'));
       assert.equal(1, files.length, 'rows size == 1');
@@ -49,6 +65,7 @@ describe(__filename, () => {
       const createAt = isoFormat(files[0].created_at);
       assert.equal(10, files[0].id);
       assert.equal('bird1', files[0].name);
+      assert.equal('up', files[0].status);
       assert.isTrue(isoFormatRegex.test(startTime), `Start time ISO: ${startTime}`);
       assert.isTrue(isoFormatRegex.test(endTime), `End time ISO: ${endTime}`);
       assert.isTrue(isoFormatRegex.test(createAt), `Created at ISO: ${createAt}`);
@@ -61,6 +78,56 @@ describe(__filename, () => {
       assert.equal('Jackie Jan', users[0].name);
       assert.equal('Bruce lee', users[1].name);
       obj.close();
+    });
+  });
+
+  describe('#revert', () => {
+    it('Run migration file', async () => {
+      const obj = await truncateMigration();
+      await obj.dropTableIfExists('users');
+      log.info('Table user deleted');
+
+      await obj.merge(2000, './test/resources/create-user-1.sql', 'bird1');
+      let files = await obj.allFiles();
+      assert.equal('up', files[0].status);
+
+      await obj.revert(2000, './test/resources/drop-user-1.sql');
+      files = await obj.allFiles();
+      assert.equal('down', files[0].status);
+      obj.close();
+    });
+  });
+
+  describe('#migrationIDExists', () => {
+    const ID = 1000;
+    it('Missing migration ID', async () => {
+      const db = await truncateMigration();
+      const bool = await db.migrationIDExists(ID);
+      assert.isTrue(!bool);
+      db.close();
+    });
+
+    it('Valid migration ID', async () => {
+      const db = await truncateMigration();
+      await db.knex('goose_migrations').insert({ id: ID });
+      const bool = await db.migrationIDExists(ID);
+      assert.isTrue(bool);
+      db.close();
+    });
+  });
+
+  describe('#mergedFiles', () => {
+    it('Should return 2 files', async () => {
+      const db = await truncateMigration();
+      await db.knex('goose_migrations').insert({ id: 10, status: 'up' });
+      await db.knex('goose_migrations').insert({ id: 20, status: 'up' });
+      await db.knex('goose_migrations').insert({ id: 30, status: 'down' });
+
+      const files = await db.mergedFiles();
+      assert.equal(2, files.length);
+      assert.equal(20, files[0].id);
+      assert.equal(10, files[1].id);
+      db.close();
     });
   });
 });

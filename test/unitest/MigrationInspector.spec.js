@@ -4,6 +4,7 @@ import Logger from '../../src/utils/Logger';
 import DatabaseHandler from '../../src/DatabaseHandler';
 import Inspector from '../../src/MigrationInspector';
 import { mysql as mysqlConfg } from '../database';
+import { truncateMigration, resetMigration } from './Helpers';
 
 const log = Logger(__filename);
 const migrationDir = Path.join('.', 'test', 'resources', 'db_migrations');
@@ -16,7 +17,7 @@ const createInspector = async () => {
 
 const migrateUp = async (id, name) => {
   const file = Path.join(migrationDir, name, 'up.sql');
-  return db.exec(id, file, name);
+  return db.merge(id, file, name);
 };
 
 const getSqlUpFile = name => Path.join(migrationDir, name, 'up.sql');
@@ -50,8 +51,7 @@ describe(__filename, () => {
   describe('#cachedFiles', () => {
     it('Should returns 1 cached migrations', async () => {
       const inspector = await createInspector();
-      await db.dropTableIfExists('goose_migrations');
-      await db.initializeTable();
+      await resetMigration(db);
 
       await migrateUp(1531703913460, '2018_06_15_1531703913460_DDL1');
 
@@ -69,8 +69,7 @@ describe(__filename, () => {
   describe('#freshFiles', () => {
     it('Should returns 1 fresh migration', async () => {
       const inspector = await createInspector();
-      await db.dropTableIfExists('goose_migrations');
-      await db.initializeTable();
+      await resetMigration(db);
 
       await migrateUp(1531703913460, '2018_06_15_1531703913460_DDL1');
 

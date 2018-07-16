@@ -4,11 +4,11 @@ import FileUtils from '../../src/utils/FileUtils';
 import Command from '../../src/Command';
 import Logger from '../../src/utils/Logger';
 import ConfigProperties from '../../src/ConfigProperties';
-import { mysql as mysqlConfig } from '../database';
 import {
   resetMigration,
   makeDatabaseHandler,
-  makeTestConfig
+  makeTestConfig,
+  truncateMigration,
 } from './Helpers';
 
 const log = Logger(__filename);
@@ -68,12 +68,14 @@ describe(__filename, () => {
 
   describe('#status', () => {
     it('Create with default parameter', async () => {
+      const db = await truncateMigration();
       const conf = makeTestConfig();
 
       const cmd = new Command(conf);
       const result = await cmd.status();
-      assert.equal(1, result.cachedFiles.length);
-      assert.equal(2, result.freshFiles.length);
+      assert.equal(0, result.cachedFiles.length);
+      assert.equal(3, result.freshFiles.length);
+      db.close();
     });
   });
 

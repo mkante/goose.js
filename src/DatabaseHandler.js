@@ -123,6 +123,7 @@ export default class Handler {
     return this.connection.createTable(tableName, (table) => {
       table.string('id').notNullable();
       table.string('name').notNullable();
+      table.string('status').notNullable();
       table.timestamp('start_time').notNullable();
       table.timestamp('end_time').notNullable();
       table.timestamp('created_at')
@@ -152,6 +153,20 @@ export default class Handler {
   }
 
   /**
+   * Select all migrations
+   * @param table
+   * @returns {Promise<void>}
+   */
+  async mergedFiles() {
+    return this.knex
+      .from(this.mTable)
+      .orderBy('id', 'desc')
+      .orderBy('name', 'desc')
+      .orderBy('created_at', 'desc')
+      .where({ status: 'up' });
+  }
+
+  /**
    * Execute a migration file
    * @param table
    * @returns {Promise<void>}
@@ -165,7 +180,7 @@ export default class Handler {
    * @param table
    * @returns {Promise<void>}
    */
-  async exec(id, filePath, name) {
+  async exec(filePath) {
     const SQL = FileUtils.read(filePath);
     log.debug(`SQL file content: ${SQL}`);
 
@@ -175,13 +190,70 @@ export default class Handler {
       await this.connection.raw(line);
     }
     const endTime = isoFormat(new Date());
-    await this.knex.insert({
+    return Promise.resolve({
+      startTime,
+      endTime,
+      lines: lines.length,
+    });
+  }
+
+  /**
+   * Merge migration.
+   * @param id
+   * @param filePath
+   * @param name
+   * @returns {Promise<*>}
+   */
+  async merge(id, filePath, name) {
+    const { startTime, endTime } = await this.exec(filePath);
+    const UP = 'up';
+
+    if (await this.migrationIDExists(id)) {
+      return this.knex(this.mTable)
+        .where({ id })
+        .update({
+          status: UP,
+          start_time: startTime,
+          end_time: endTime,
+        });
+    }
+
+    return this.knex(this.mTable).insert({
       id,
       name,
+      status: UP,
       start_time: startTime,
       end_time: endTime,
-    }).into(this.mTable);
-    return Promise.resolve(lines.length);
+    });
+  }
+
+  /**
+   * Revert
+   * @param id
+   * @param filePath
+   * @returns {Promise<*>}
+   */
+  async revert(id, filePath) {
+    const { startTime, endTime } = await this.exec(filePath);
+    return this.knex(this.mTable)
+      .update({
+        status: 'down',
+        start_time: startTime,
+        end_time: endTime,
+      }).where({ id });
+  }
+
+  /**
+   * Check if migration exists.
+   * @param id
+   * @returns {Promise<boolean>}
+   */
+  async migrationIDExists(id) {
+    const row = await this.knex(this.mTable)
+      .where({ id })
+      .select()
+      .first();
+    return row !== undefined;
   }
 
   /**

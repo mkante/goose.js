@@ -27,7 +27,12 @@ const doMigrations = async function f(db, array, useSqlUpFile = true) {
       out.warn(`Missing migration: ${filePath}`);
       continue;
     }
-    await db.exec(id, filePath, name);
+
+    if (useSqlUpFile) {
+      await db.merge(id, filePath, name);
+    } else {
+      await db.revert(id, filePath);
+    }
   }
 };
 

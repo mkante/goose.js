@@ -15,6 +15,7 @@ const rowAdaptor = function f(row) {
   return {
     id: row.id,
     name: row.name,
+    status: row.status,
     startTime: row.start_time,
     endTime: row.end_time,
     date: row.created_at,
@@ -31,7 +32,7 @@ const addUpDownFiles = (rootDir, it) => {
   _.set(it, 'sqlUpFile', Path.join(rootDir, it.name, 'up.sql'));
   _.set(it, 'sqlDownFile', Path.join(rootDir, it.name, 'down.sql'));
   return it;
-}
+};
 
 export default class {
   constructor(databaseHandler, migrationFolder) {
@@ -66,8 +67,18 @@ export default class {
    */
   async freshFiles() {
     const cachedFiles = await this.cachedFiles();
-    const cachedNames = _(cachedFiles).map(it => it.name).value();
+    const exclude = _(cachedFiles).map(it => it.name).value();
     const localFiles = await this.localFiles();
-    return _(localFiles).filter(it => !cachedNames.includes(it.name)).value();
+    return _(localFiles).filter(it => !exclude.includes(it.name)).value();
+  }
+
+  /**
+   * Returns files ready for migration
+   */
+  async stagedFiles() {
+    const mergedFiles = await this.mergedFiles();
+    const exclude = _(mergedFiles).map(it => it.name).value();
+    const localFiles = await this.localFiles();
+    return _(localFiles).filter(it => !exclude.includes(it.name)).value();
   }
 }

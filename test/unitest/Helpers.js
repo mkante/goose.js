@@ -24,8 +24,18 @@ const makeTestConfig = () => {
 
 const makeDatabaseHandler = async () => {
   const conf = makeTestConfig();
-  const db = await DatabaseHandler.create(conf.database);
+  return DatabaseHandler.create(conf.database);
+};
+
+const truncateMigration = async () => {
+  const db = await makeDatabaseHandler();
+  await resetMigration(db);
   return db;
 };
 
-export { resetMigration, makeTestConfig, makeDatabaseHandler };
+export {
+  resetMigration,
+  makeTestConfig,
+  makeDatabaseHandler,
+  truncateMigration,
+};
