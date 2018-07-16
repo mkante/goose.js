@@ -33,15 +33,11 @@ export default {
     _.each(files, (it) => {
       let formatedDate = '-';
       let status = '-';
-      let mId = '-';
-      let mName = '-';
+      const mId = it.id;
+      const mName = it.name;
       if (it.date) {
         formatedDate = dateformat(it.date, 'yyyy-mm-dd h:MM:ss');
         status = 'up';
-        mId = it.id;
-        mName = it.name;
-      } else {
-        mName = it;
       }
 
       out.print(

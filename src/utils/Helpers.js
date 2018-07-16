@@ -19,7 +19,8 @@ const migrationNameParser = (fileName) => {
   const matches = fileName.match(DDL_NAME_MATCHER);
   return {
     id: _.get(matches, '[1]', null),
-    name: _.get(matches, '[2]', null),
+    name: fileName,
+    suffix: _.get(matches, '[2]', null),
   };
 };
 

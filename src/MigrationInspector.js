@@ -1,6 +1,7 @@
 import _ from 'lodash';
+import Path from 'path';
 import FileUtils from './utils/FileUtils';
-import { DDL_NAME_MATCHER } from './utils/Helpers';
+import { DDL_NAME_MATCHER, migrationNameParser } from './utils/Helpers';
 
 /**
  * Sort array
@@ -20,6 +21,18 @@ const rowAdaptor = function f(row) {
   };
 };
 
+/**
+ * Add up and down SQL files path
+ * @param rootDir
+ * @param it
+ * @returns {*}
+ */
+const addUpDownFiles = (rootDir, it) => {
+  it.sqlUpFile = Path.join(rootDir, it.name, 'up.sql');
+  it.sqlDownFile = Path.join(rootDir, it.name, 'down.sql');
+  return it;
+}
+
 export default class {
   constructor(databaseHandler, migrationFolder) {
     this.db = databaseHandler;
@@ -30,9 +43,12 @@ export default class {
    * Returns local migration files
    */
   async localFiles() {
-    const files = FileUtils.files(this.folder, DDL_NAME_MATCHER, false);
+    let files = FileUtils.files(this.folder, DDL_NAME_MATCHER, false);
     // sort files
-    return sortByDate(files);
+    files = sortByDate(files);
+    return _(files).map(migrationNameParser)
+      .map(it => addUpDownFiles(this.folder, it))
+      .value();
   }
 
   /**
@@ -40,7 +56,9 @@ export default class {
    */
   async cachedFiles() {
     const rows = await this.db.allFiles();
-    return _(rows).map(rowAdaptor).value();
+    return _(rows).map(rowAdaptor)
+      .map(it => addUpDownFiles(this.folder, it))
+      .value();
   }
 
   /**
@@ -50,6 +68,6 @@ export default class {
     const cachedFiles = await this.cachedFiles();
     const cachedNames = _(cachedFiles).map(it => it.name).value();
     const localFiles = await this.localFiles();
-    return _(localFiles).filter(it => !cachedNames.includes(it)).value();
+    return _(localFiles).filter(it => !cachedNames.includes(it.name)).value();
   }
 }

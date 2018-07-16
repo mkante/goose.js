@@ -22,13 +22,13 @@ describe(__filename, () => {
     it('Invalid names', () => {
       const v = migrationNameParser('more_like_this');
       assert.isNull(v.id);
-      assert.isNull(v.name);
+      assert.equal('more_like_this', v.name);
     })
 
     it('Valid names', () => {
       const v = migrationNameParser('2018_06_15_1234567890123_DDL201');
       assert.equal('1234567890123', v.id);
-      assert.equal('DDL201', v.name);
+      assert.equal('2018_06_15_1234567890123_DDL201', v.name);
     });
   });
 });

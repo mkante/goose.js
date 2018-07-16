@@ -19,6 +19,9 @@ const migrateUp = async (id, name) => {
   return db.exec(id, file, name);
 };
 
+const getSqlUpFile = name => Path.join(migrationDir, name, 'up.sql');
+const getSqlDownFile = name => Path.join(migrationDir, name, 'down.sql');
+
 describe(__filename, () => {
   describe('#localFiles', () => {
     it('Should returns 2 migrations', async () => {
@@ -26,9 +29,20 @@ describe(__filename, () => {
 
       const files = await inspector.localFiles();
       log.info(`Files: ${files}`);
+      let upFile1 = getSqlUpFile('2018_06_15_1531703913460_DDL1');
+      let downFile2 = getSqlDownFile('2018_06_15_1531703913460_DDL1');
       assert.equal(2, files.length, '2 files found');
-      assert.equal('2018_06_15_1531703913460_DDL1', files[0]);
-      assert.equal('2018_06_15_1531703956888_DDL2', files[1]);
+      assert.equal(1531703913460, files[0].id);
+      assert.equal('2018_06_15_1531703913460_DDL1', files[0].name);
+      assert.equal(upFile1, files[0].sqlUpFile);
+      assert.equal(downFile2, files[0].sqlDownFile);
+
+      upFile1 = getSqlUpFile('2018_06_15_1531703956888_DDL2');
+      downFile2 = getSqlDownFile('2018_06_15_1531703956888_DDL2');
+      assert.equal(1531703956888, files[1].id);
+      assert.equal('2018_06_15_1531703956888_DDL2', files[1].name);
+      assert.equal(upFile1, files[1].sqlUpFile);
+      assert.equal(downFile2, files[1].sqlDownFile);
       db.close();
     });
   });
@@ -46,6 +60,8 @@ describe(__filename, () => {
       assert.equal(1, files.length, '2 files found');
       assert.equal(1531703913460, files[0].id);
       assert.equal('2018_06_15_1531703913460_DDL1', files[0].name);
+      assert.equal(getSqlUpFile('2018_06_15_1531703913460_DDL1'), files[0].sqlUpFile);
+      assert.equal(getSqlDownFile('2018_06_15_1531703913460_DDL1'), files[0].sqlDownFile);
       db.close();
     });
   });
@@ -61,7 +77,7 @@ describe(__filename, () => {
       const files = await inspector.freshFiles();
       log.info(`Files: ${files}`);
       assert.equal(1, files.length, '1 files found');
-      assert.equal('2018_06_15_1531703956888_DDL2', files[0]);
+      assert.equal('2018_06_15_1531703956888_DDL2', files[0].name);
       db.close();
     });
   });

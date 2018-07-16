@@ -171,9 +171,8 @@ export default class Handler {
 
     const lines = Handler.splitStatements(SQL);
     const startTime = isoFormat(new Date());
-    for (const i in lines) { // eslint-disable-line
-      const line = lines[i];
-      await this.connection.raw(line); // eslint-disable-line
+    for (const line of lines) { // eslint-disable-line
+      await this.connection.raw(line);
     }
     const endTime = isoFormat(new Date());
     await this.knex.insert({
