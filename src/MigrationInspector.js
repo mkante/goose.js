@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import FileUtils from './utils/FileUtils';
+import { DDL_NAME_MATCHER } from './utils/Helpers';
 
 /**
  * Sort array
@@ -19,7 +20,7 @@ export default class {
    * Returns local migration files
    */
   async localFiles() {
-    const files = FileUtils.files(this.folder, /.*/, false);
+    const files = FileUtils.files(this.folder, DDL_NAME_MATCHER, false);
     // sort files
     return sortByDate(files);
   }

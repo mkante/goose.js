@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import Logger from '../../../src/utils/Logger';
-import { makeDDLName, migrationInfo } from '../../../src/utils/Helpers';
+import { makeDDLName, migrationNameParser } from '../../../src/utils/Helpers';
 
 const log = Logger(__filename);
 
@@ -18,15 +18,15 @@ describe(__filename, () => {
       assert.isTrue(/^\d{4}_\d{2}_\d{2}_\d{13}_users$/.test(name));
     });
   });
-  describe('#migrationInfo', () => {
+  describe('#migrationNameParser', () => {
     it('Invalid names', () => {
-      const v = migrationInfo('more_like_this');
+      const v = migrationNameParser('more_like_this');
       assert.isNull(v.id);
       assert.isNull(v.name);
     })
 
     it('Valid names', () => {
-      const v = migrationInfo('2018_06_15_1234567890123_DDL201');
+      const v = migrationNameParser('2018_06_15_1234567890123_DDL201');
       assert.equal('1234567890123', v.id);
       assert.equal('DDL201', v.name);
     });

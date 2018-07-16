@@ -53,7 +53,6 @@ describe(__filename, () => {
       assert.isTrue(isoFormatRegex.test(endTime), `End time ISO: ${endTime}`);
       assert.isTrue(isoFormatRegex.test(createAt), `Created at ISO: ${createAt}`);
 
-
       const users = await obj.knex.select()
         .orderBy('id', 'asc')
         .from('users');
