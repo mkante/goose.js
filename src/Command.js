@@ -1,6 +1,10 @@
 import Path from 'path';
+import _ from 'lodash';
 import FileUtils from './utils/FileUtils';
+import DatabaseHandler from './DatabaseHandler';
+import Inspector from './MigrationInspector';
 import { makeDDLName } from './utils/Helpers';
+import Views from './Views';
 import out from './utils/Out';
 
 export default class {
@@ -52,8 +56,8 @@ export default class {
     const upTemplate = '// Add migration UP SQL statements.';
     const downTemplate = '// Add rollback SQL statements.';
     FileUtils.mkdir(dir);
-    FileUtils.put(`${dir}/up.sql`, upTemplate);
-    FileUtils.put(`${dir}/down.sql`, downTemplate);
+    FileUtils.put(Path.join(dir, 'up.sql'), upTemplate);
+    FileUtils.put(Path.join(dir, 'down.sql'), downTemplate);
     out.print(`New migration create: ${newMigrationName}`);
     return dir;
   }
@@ -64,15 +68,37 @@ export default class {
    * @returns {Promise<void>}
    */
   async status() {
-    const { homeDir } = this.config;
-    const newMigrationName = makeDDLName(name);
-    const dir = Path.join(homeDir, newMigrationName);
-    const upTemplate = '// Add migration UP SQL statements.';
-    const downTemplate = '// Add a SQL statements.';
-    FileUtils.mkdir(dir);
-    FileUtils.put(`${dir}/up.sql`, upTemplate);
-    FileUtils.put(`${dir}/down.sql`, downTemplate);
-    out.print(`New migration create: ${newMigrationName}`);
-    return dir;
+    return this.runScope(async (inspector) => {
+      const cachedFiles = await inspector.cachedFiles();
+      const freshFiles = await inspector.freshFiles();
+
+      const mergedFiles = cachedFiles.concat(freshFiles);
+      Views.printStatus(mergedFiles);
+
+      return { cachedFiles, freshFiles };
+    });
+  }
+
+  /**
+   * Run function in transaction scope
+   * @param callback
+   * @returns {Promise<*>}
+   */
+  async runScope(callback) {
+    let db = null;
+    let result = null;
+    out.print(`Current environment: ${this.config.environment}`);
+    const dbConfig = this.config.database;
+    const migrationDir = this.config.paths.migrations;
+    try {
+      db = await DatabaseHandler.create(dbConfig);
+      const inspector = new Inspector(db, migrationDir);
+      result = await callback(inspector, db);
+      db.close();
+    } catch (e) {
+      if (db) db.close();
+      throw e;
+    }
+    return result;
   }
 }

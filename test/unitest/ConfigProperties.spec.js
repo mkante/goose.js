@@ -10,7 +10,8 @@ describe(__filename, () => {
     it('Check default propertis', () => {
       assert.equal('goose_migrations', obj.defaultMigrationTable);
       assert.isNull(obj.defaultDatabase);
-      assert.isNull(obj.dbEnv('prod'));
+      assert.isNull(obj.getEnvironmentDatabse('prod'));
+      assert.isNull(obj.database);
       assert.equal('db/migrations', obj.paths.migrations);
       assert.equal('db/seeds', obj.paths.seeds);
     });

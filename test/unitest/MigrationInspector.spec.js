@@ -44,7 +44,8 @@ describe(__filename, () => {
       const files = await inspector.cachedFiles();
       log.info(`Files: ${files}`);
       assert.equal(1, files.length, '2 files found');
-      assert.equal('2018_06_15_1531703913460_DDL1', files[0]);
+      assert.equal(1531703913460, files[0].id);
+      assert.equal('2018_06_15_1531703913460_DDL1', files[0].name);
       db.close();
     });
   });

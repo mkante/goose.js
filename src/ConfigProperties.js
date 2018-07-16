@@ -39,6 +39,7 @@ export default class {
       migrations: _.get(params, 'paths.migrations', 'db/migrations'),
       seeds: _.get(params, 'paths.seeds', 'db/seeds'),
     };
+    this.environment = null;
   }
   get templateDir() {
     return Path.join(__dirname, '../template');
@@ -55,11 +56,17 @@ export default class {
   get defaultDatabase() {
     return _.get(this.environments, 'default_database', null);
   }
-  dbEnv(env) {
+  getEnvironmentDatabse(env) {
     return _.get(this.environments, env, null);
   }
-  get dbEnvDefault() {
-    return this.dbEnv(this.defaultDatabase);
+  get database() {
+    return this.getEnvironmentDatabse(this.environment);
+  }
+  get migrationsDir() {
+    return Path.join(this.homeDir, this.paths.migrations);
+  }
+  get seedsDir() {
+    return Path.join(this.homeDir, this.paths.seeds);
   }
   static async from(filePath) {
     const data = await this.readFile(filePath);

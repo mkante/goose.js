@@ -1,8 +1,10 @@
 import { assert } from 'chai';
+import Path from 'path';
 import FileUtils from '../../src/utils/FileUtils';
 import Command from '../../src/Command';
 import Logger from '../../src/utils/Logger';
 import ConfigProperties from '../../src/ConfigProperties';
+import { mysql as mysqlConfig } from '../database';
 
 const log = Logger(__filename);
 
@@ -55,6 +57,26 @@ describe(__filename, () => {
       assert.equal(2, files.length, 'up.sql and down.sql files');
       assert.isTrue(FileUtils.isFile(`${directory}/up.sql`), 'down.sql file exists');
       assert.isTrue(FileUtils.isFile(`${directory}/down.sql`), 'down.sql file exists');
+    });
+  });
+
+  describe('#status', () => {
+    it('Create with default parameter', async () => {
+      const conf = new ConfigProperties({
+        homeDir: '.',
+        environments: {
+          test: mysqlConfig,
+        },
+        paths: {
+          migrations: Path.join('test', 'resources', 'db_migrations'),
+        },
+      });
+      conf.environment = 'test';
+
+      const cmd = new Command(conf);
+      const result = await cmd.status();
+      assert.equal(1, result.cachedFiles.length);
+      assert.equal(1, result.freshFiles.length);
     });
   });
 });

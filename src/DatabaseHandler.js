@@ -121,7 +121,7 @@ export default class Handler {
    */
   async createMigrationTable(tableName) {
     return this.connection.createTable(tableName, (table) => {
-      table.integer('id').notNullable();
+      table.string('id').notNullable();
       table.string('name').notNullable();
       table.timestamp('start_time').notNullable();
       table.timestamp('end_time').notNullable();
@@ -171,11 +171,11 @@ export default class Handler {
 
     const lines = Handler.splitStatements(SQL);
     const startTime = isoFormat(new Date());
-    _.each(lines, async (line) => {
-      await this.connection.raw(line);
-    });
+    for (const i in lines) { // eslint-disable-line
+      const line = lines[i];
+      await this.connection.raw(line); // eslint-disable-line
+    }
     const endTime = isoFormat(new Date()); console.log(endTime);
-
     await this.knex.insert({
       id,
       name,

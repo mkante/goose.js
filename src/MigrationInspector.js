@@ -10,6 +10,16 @@ import { DDL_NAME_MATCHER } from './utils/Helpers';
  */
 const sortByDate = (array, direction = 'asc') => _.orderBy(array, [_.identity()], [direction]);
 
+const rowAdaptor = function (row) {
+  return {
+    id: row.id,
+    name: row.name,
+    startTime: row.start_time,
+    endTime: row.end_time,
+    date: row.created_at,
+  };
+};
+
 export default class {
   constructor(databaseHandler, migrationFolder) {
     this.db = databaseHandler;
@@ -30,7 +40,7 @@ export default class {
    */
   async cachedFiles() {
     const rows = await this.db.allFiles();
-    return _(rows).map(it => it.name).value();
+    return _(rows).map(rowAdaptor).value();
   }
 
   /**
@@ -38,7 +48,8 @@ export default class {
    */
   async freshFiles() {
     const cachedFiles = await this.cachedFiles();
+    const cachedNames = _(cachedFiles).map(it => it.name).value();
     const localFiles = await this.localFiles();
-    return _(localFiles).filter(it => !cachedFiles.includes(it)).value();
+    return _(localFiles).filter(it => !cachedNames.includes(it)).value();
   }
 }
