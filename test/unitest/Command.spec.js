@@ -160,6 +160,8 @@ describe(__filename, () => {
 
       status = await cmd.status();
       assert.equal(2, status.cachedFiles.length);
+      assert.equal('up', status.cachedFiles[0].status);
+      assert.equal('down', status.cachedFiles[1].status);
       assert.equal(1, status.freshFiles.length);
       db.close();
     });

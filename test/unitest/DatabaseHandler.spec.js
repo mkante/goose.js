@@ -125,8 +125,8 @@ describe(__filename, () => {
 
       const files = await db.mergedFiles();
       assert.equal(2, files.length);
-      assert.equal(20, files[0].id);
-      assert.equal(10, files[1].id);
+      assert.equal(10, files[0].id);
+      assert.equal(20, files[1].id);
       db.close();
     });
   });

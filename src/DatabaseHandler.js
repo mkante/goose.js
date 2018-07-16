@@ -146,9 +146,9 @@ export default class Handler {
    */
   async allFiles() {
     return this.knex
-      .orderBy('id', 'desc')
-      .orderBy('name', 'desc')
-      .orderBy('created_at', 'desc')
+      .orderBy('id', 'asc')
+      .orderBy('name', 'asc')
+      .orderBy('created_at', 'asc')
       .from(this.mTable);
   }
 
@@ -160,9 +160,9 @@ export default class Handler {
   async mergedFiles() {
     return this.knex
       .from(this.mTable)
-      .orderBy('id', 'desc')
-      .orderBy('name', 'desc')
-      .orderBy('created_at', 'desc')
+      .orderBy('id', 'asc')
+      .orderBy('name', 'asc')
+      .orderBy('created_at', 'asc')
       .where({ status: 'up' });
   }
 

@@ -118,8 +118,8 @@ export default class Command {
    */
   async up(cursorId) {
     return this.transactionScope(async (inspector, db) => {
-      const files = await inspector.freshFiles();
-      const filteredList = Command.filterByCursor(files, cursorId);
+      const files = await inspector.stagedFiles();
+      const filteredList = Command.filterByCursor(files, cursorId, _.first);
       await doMigrations(db, filteredList, true);
       return filteredList;
     });
@@ -133,7 +133,7 @@ export default class Command {
   async down(cursorId) {
     return this.transactionScope(async (inspector, db) => {
       const files = await inspector.cachedFiles();
-      const filteredList = Command.filterByCursor(files, cursorId);
+      const filteredList = Command.filterByCursor(files, cursorId, _.last);
       await doMigrations(db, filteredList, false);
       return filteredList;
     });
@@ -168,12 +168,12 @@ export default class Command {
    * @param cursorId
    * @returns {*}
    */
-  static filterByCursor(array, cursorId) {
+  static filterByCursor(array, cursorId, nextIdFunc = _.first) {
     if (!array) {
       return [];
     }
     if (!cursorId) {
-      const item = _.first(array);
+      const item = nextIdFunc(array);
       return item ? [item] : [];
     }
     return _(array).filter(it => (cursorId === 0) || (it.id <= cursorId)).value();
