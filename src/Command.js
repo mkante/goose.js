@@ -101,8 +101,11 @@ export default class Command {
       const cachedFiles = await inspector.cachedFiles();
       const freshFiles = await inspector.freshFiles();
 
-      const mergedFiles = cachedFiles.concat(freshFiles);
-      Views.printStatus(mergedFiles);
+      let consolidate = cachedFiles.concat(freshFiles);
+      consolidate = _(consolidate).uniqBy(it => it.id)
+        .sortBy(it => it.id)
+        .value();
+      Views.printStatus(consolidate);
 
       return { cachedFiles, freshFiles };
     });

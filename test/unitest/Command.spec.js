@@ -143,4 +143,25 @@ describe(__filename, () => {
       db.close();
     });
   });
+
+  describe('#down', () => {
+    it('Migrate down 1 file', async () => {
+      const conf = makeTestConfig();
+      const db = await makeDatabaseHandler();
+      await resetMigration(db);
+      const cmd = new Command(conf);
+      let status = await cmd.status();
+      assert.equal(0, status.cachedFiles.length);
+      assert.equal(3, status.freshFiles.length);
+
+      await cmd.up();
+      await cmd.up();
+      await cmd.down();
+
+      status = await cmd.status();
+      assert.equal(2, status.cachedFiles.length);
+      assert.equal(1, status.freshFiles.length);
+      db.close();
+    });
+  });
 });
