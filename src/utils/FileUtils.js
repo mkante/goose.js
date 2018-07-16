@@ -35,7 +35,7 @@ export default {
     }
     return bool;
   },
-  files: function f(path, regex = /.*/) {
+  files: function f(path, regex = /.*/, fullPaths = true) {
     if (!this.isDir(path)) {
       throw new FileNotDirectory(`path: ${path} is not a directory`);
     }
@@ -43,9 +43,12 @@ export default {
     let list = [];
     try {
       list = fs.readdirSync(path);
-      list = _(list).filter(it => regex.test(it))
-        .map(it => Path.join(path, it))
-        .value();
+      // Append root path to files
+      if (fullPaths) {
+        list = _(list).filter(it => regex.test(it))
+          .map(it => Path.join(path, it))
+          .value();
+      }
     } catch (e) {
       log.error(e.message, e);
     }
