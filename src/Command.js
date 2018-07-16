@@ -1,5 +1,4 @@
 import Path from 'path';
-import _ from 'lodash';
 import FileUtils from './utils/FileUtils';
 import DatabaseHandler from './DatabaseHandler';
 import Inspector from './MigrationInspector';
@@ -53,8 +52,8 @@ export default class {
     const { homeDir } = this.config;
     const newMigrationName = makeDDLName(name);
     const dir = Path.join(homeDir, newMigrationName);
-    const upTemplate = '// Add migration UP SQL statements.';
-    const downTemplate = '// Add rollback SQL statements.';
+    const upTemplate = '-- Add migration UP SQL statements.';
+    const downTemplate = '-- Add rollback SQL statements.';
     FileUtils.mkdir(dir);
     FileUtils.put(Path.join(dir, 'up.sql'), upTemplate);
     FileUtils.put(Path.join(dir, 'down.sql'), downTemplate);

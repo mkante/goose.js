@@ -10,7 +10,7 @@ import { DDL_NAME_MATCHER } from './utils/Helpers';
  */
 const sortByDate = (array, direction = 'asc') => _.orderBy(array, [_.identity()], [direction]);
 
-const rowAdaptor = function (row) {
+const rowAdaptor = function f(row) {
   return {
     id: row.id,
     name: row.name,

@@ -175,7 +175,7 @@ export default class Handler {
       const line = lines[i];
       await this.connection.raw(line); // eslint-disable-line
     }
-    const endTime = isoFormat(new Date()); console.log(endTime);
+    const endTime = isoFormat(new Date());
     await this.knex.insert({
       id,
       name,
