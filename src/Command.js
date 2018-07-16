@@ -31,7 +31,7 @@ const doMigrations = async function f(db, array, useSqlUpFile = true) {
   }
 };
 
-export default class {
+export default class Command {
   constructor(config) {
     this.config = config;
   }
@@ -92,7 +92,7 @@ export default class {
    * @returns {Promise<void>}
    */
   async status() {
-    return this.runScope(async (inspector) => {
+    return this.transactionScope(async (inspector) => {
       const cachedFiles = await inspector.cachedFiles();
       const freshFiles = await inspector.freshFiles();
 
@@ -108,12 +108,12 @@ export default class {
    * @param name
    * @returns {Promise<void>}
    */
-  async up() {
-    return this.runScope(async (inspector, db) => {
-      const freshFiles = await inspector.freshFiles();
-      const item = _.first(freshFiles);
-      await doMigrations(db, [item], true);
-      return item;
+  async up(cursorId) {
+    return this.transactionScope(async (inspector, db) => {
+      const files = await inspector.freshFiles();
+      const filteredList = Command.filterByCursor(files, cursorId);
+      await doMigrations(db, filteredList, true);
+      return filteredList;
     });
   }
 
@@ -122,12 +122,12 @@ export default class {
    * @param name
    * @returns {Promise<void>}
    */
-  async down() {
-    return this.runScope(async (inspector, db) => {
-      const freshFiles = await inspector.cachedFiles();
-      const item = _.first(freshFiles);
-      await doMigrations(db, [item], false);
-      return item;
+  async down(cursorId) {
+    return this.transactionScope(async (inspector, db) => {
+      const files = await inspector.cachedFiles();
+      const filteredList = Command.filterByCursor(files, cursorId);
+      await doMigrations(db, filteredList, false);
+      return filteredList;
     });
   }
 
@@ -136,7 +136,7 @@ export default class {
    * @param callback
    * @returns {Promise<*>}
    */
-  async runScope(callback) {
+  async transactionScope(callback) {
     let db = null;
     let result = null;
     out.print(`Current environment: ${this.config.environment}`);
@@ -152,5 +152,21 @@ export default class {
       throw e;
     }
     return result;
+  }
+
+  /**
+   * Filter migration all the migrations above cursorId
+   * @param array
+   * @param cursorId
+   * @returns {*}
+   */
+  static filterByCursor(array, cursorId) {
+    if (!array) {
+      return [];
+    }
+    if (!cursorId) {
+      return array;
+    }
+    return _(array).filter(it => it.id <= cursorId).value();
   }
 }

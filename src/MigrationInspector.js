@@ -28,8 +28,8 @@ const rowAdaptor = function f(row) {
  * @returns {*}
  */
 const addUpDownFiles = (rootDir, it) => {
-  it.sqlUpFile = Path.join(rootDir, it.name, 'up.sql');
-  it.sqlDownFile = Path.join(rootDir, it.name, 'down.sql');
+  _.set(it, 'sqlUpFile', Path.join(rootDir, it.name, 'up.sql'));
+  _.set(it, 'sqlDownFile', Path.join(rootDir, it.name, 'down.sql'));
   return it;
 }
 
