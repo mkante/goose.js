@@ -37,7 +37,7 @@ export default {
   },
   files: function f(path, regex = /.*/, fullPaths = true) {
     if (!this.isDir(path)) {
-      throw new FileNotDirectory(`path: ${path} is not a directory`);
+      throw new FileNotDirectory(`path: "${path}" is not a directory`);
     }
 
     let list = [];
@@ -54,21 +54,6 @@ export default {
     }
     return list;
   },
-  /*
-  rm: function f(path) {
-    let bool = false;
-    if (!path) {
-      return bool;
-    }
-    try {
-      fs.unlinkSync(path);
-      bool = true;
-    } catch (e) {
-      log.error(e);
-    }
-    return bool;
-  },
-  */
   put: function f(path, content) {
     return fs.writeFileSync(path, content);
   },

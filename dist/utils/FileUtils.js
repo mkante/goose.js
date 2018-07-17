@@ -63,7 +63,7 @@ exports.default = {
     var fullPaths = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
 
     if (!this.isDir(path)) {
-      throw new _Error.FileNotDirectory('path: ' + path + ' is not a directory');
+      throw new _Error.FileNotDirectory('path: "' + path + '" is not a directory');
     }
 
     var list = [];
@@ -81,21 +81,6 @@ exports.default = {
     }
     return list;
   },
-  /*
-  rm: function f(path) {
-    let bool = false;
-    if (!path) {
-      return bool;
-    }
-    try {
-      fs.unlinkSync(path);
-      bool = true;
-    } catch (e) {
-      log.error(e);
-    }
-    return bool;
-  },
-  */
   put: function f(path, content) {
     return _fs2.default.writeFileSync(path, content);
   },

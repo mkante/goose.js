@@ -1,5 +1,4 @@
 import { assert } from 'chai';
-import Path from 'path';
 import FileUtils from '../../src/utils/FileUtils';
 import Command from '../../src/Command';
 import Logger from '../../src/utils/Logger';
@@ -19,10 +18,13 @@ const testTempDir = () => FileUtils.mkdtemp('/tmp/goose_test');
 describe(__filename, () => {
   describe('#init', () => {
     it('Initialize with json config', async () => {
-      const tmpDir = testTempDir()
+      const tmpDir = testTempDir();
       log.info(`Temp directory: ${tmpDir}`);
       const cmd = new Command(new ConfigProperties({
         homeDir: tmpDir,
+        paths: {
+          migrations: '.',
+        },
       }));
 
       assert.isTrue(FileUtils.isDir(tmpDir), `temp ${tmpDir} directory exists`);
@@ -36,7 +38,12 @@ describe(__filename, () => {
 
     it('Initialize with YAML config', async () => {
       const tmpDir = testTempDir();
-      const cmd = new Command(new ConfigProperties({ homeDir: tmpDir }));
+      const cmd = new Command(new ConfigProperties({
+        homeDir: tmpDir,
+        paths: {
+          migrations: '.',
+        },
+      }));
 
       assert.isTrue(FileUtils.isDir(tmpDir), `Temp ${tmpDir} directory exists`);
       await cmd.init('yaml');
@@ -54,6 +61,9 @@ describe(__filename, () => {
       log.info(`Temp directory: ${tmpDir}`);
       const cmd = new Command(new ConfigProperties({
         homeDir: tmpDir,
+        paths: {
+          migrations: '.',
+        },
       }));
 
       const directory = await cmd.create();

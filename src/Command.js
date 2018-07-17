@@ -79,9 +79,8 @@ export default class Command {
    * @returns {Promise<void>}
    */
   async create(name) {
-    const { homeDir } = this.config;
     const newMigrationName = makeDDLName(name);
-    const dir = Path.join(homeDir, newMigrationName);
+    const dir = Path.join(this.config.migrationsDir, newMigrationName);
     const upTemplate = '-- Add migration UP SQL statements.';
     const downTemplate = '-- Add rollback SQL statements.';
     FileUtils.mkdir(dir);
@@ -147,12 +146,15 @@ export default class Command {
   async transactionScope(callback) {
     let db = null;
     let result = null;
-    out.info(`Using environment: ${this.config.environment}`);
+    const { environment } = this.config;
+    out.info(`Using environment: ${environment}`);
     const dbConfig = this.config.database;
-    const migrationDir = this.config.paths.migrations;
+    if (!dbConfig) {
+      throw new Error(`No database found for environment: ${environment}`);
+    }
     try {
       db = await DatabaseHandler.create(dbConfig);
-      const inspector = new Inspector(db, migrationDir);
+      const inspector = new Inspector(db, this.config.migrationsDir);
       result = await callback(inspector, db);
       db.close();
     } catch (e) {

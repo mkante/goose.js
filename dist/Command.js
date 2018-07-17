@@ -146,10 +146,8 @@ var Command = function () {
   }, {
     key: 'create',
     value: async function create(name) {
-      var homeDir = this.config.homeDir;
-
       var newMigrationName = (0, _Helpers.makeDDLName)(name);
-      var dir = _path2.default.join(homeDir, newMigrationName);
+      var dir = _path2.default.join(this.config.migrationsDir, newMigrationName);
       var upTemplate = '-- Add migration UP SQL statements.';
       var downTemplate = '-- Add rollback SQL statements.';
       _FileUtils2.default.mkdir(dir);
@@ -229,12 +227,16 @@ var Command = function () {
     value: async function transactionScope(callback) {
       var db = null;
       var result = null;
-      _Out2.default.info('Using environment: ' + this.config.environment);
+      var environment = this.config.environment;
+
+      _Out2.default.info('Using environment: ' + environment);
       var dbConfig = this.config.database;
-      var migrationDir = this.config.paths.migrations;
+      if (!dbConfig) {
+        throw new Error('No database found for environment: ' + environment);
+      }
       try {
         db = await _DatabaseHandler2.default.create(dbConfig);
-        var inspector = new _MigrationInspector2.default(db, migrationDir);
+        var inspector = new _MigrationInspector2.default(db, this.config.migrationsDir);
         result = await callback(inspector, db);
         db.close();
       } catch (e) {
