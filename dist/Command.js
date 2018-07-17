@@ -10,6 +10,10 @@ var _path = require('path');
 
 var _path2 = _interopRequireDefault(_path);
 
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
 var _FileUtils = require('./utils/FileUtils');
 
 var _FileUtils2 = _interopRequireDefault(_FileUtils);
@@ -36,9 +40,62 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var _class = function () {
-  function _class(config) {
-    _classCallCheck(this, _class);
+/**
+ * TODO: I don't like this method signature find a better way
+ * Run migrations
+ * @param db
+ * @param array
+ * @param sqlFile
+ * @returns {Promise<void>}
+ */
+var doMigrations = async function f(db, array) {
+  var useSqlUpFile = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+  var _iteratorNormalCompletion = true;
+  var _didIteratorError = false;
+  var _iteratorError = undefined;
+
+  try {
+    for (var _iterator = array[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+      var item = _step.value;
+      // eslint-disable-line
+      if (!item) {
+        continue;
+      }
+      var id = item.id,
+          name = item.name;
+
+      var filePath = useSqlUpFile ? item.sqlUpFile : item.sqlDownFile;
+
+      if (!_FileUtils2.default.isFile(filePath)) {
+        _Out2.default.warn('Missing migration: ' + filePath);
+        continue;
+      }
+
+      if (useSqlUpFile) {
+        await db.merge(id, filePath, name);
+      } else {
+        await db.revert(id, filePath);
+      }
+    }
+  } catch (err) {
+    _didIteratorError = true;
+    _iteratorError = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion && _iterator.return) {
+        _iterator.return();
+      }
+    } finally {
+      if (_didIteratorError) {
+        throw _iteratorError;
+      }
+    }
+  }
+};
+
+var Command = function () {
+  function Command(config) {
+    _classCallCheck(this, Command);
 
     this.config = config;
   }
@@ -50,7 +107,7 @@ var _class = function () {
    */
 
 
-  _createClass(_class, [{
+  _createClass(Command, [{
     key: 'init',
     value: async function init() {
       var format = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'json';
@@ -103,7 +160,7 @@ var _class = function () {
     }
 
     /**
-     * Create migration file
+     * Get migration status
      * @param name
      * @returns {Promise<void>}
      */
@@ -111,14 +168,53 @@ var _class = function () {
   }, {
     key: 'status',
     value: async function status() {
-      return this.runScope(async function (inspector) {
+      return this.transactionScope(async function (inspector) {
         var cachedFiles = await inspector.cachedFiles();
         var freshFiles = await inspector.freshFiles();
 
-        var mergedFiles = cachedFiles.concat(freshFiles);
-        _Views2.default.printStatus(mergedFiles);
+        var consolidate = cachedFiles.concat(freshFiles);
+        consolidate = (0, _lodash2.default)(consolidate).uniqBy(function (it) {
+          return it.id;
+        }).sortBy(function (it) {
+          return it.id;
+        }).value();
+        _Views2.default.printStatus(consolidate);
 
         return { cachedFiles: cachedFiles, freshFiles: freshFiles };
+      });
+    }
+
+    /**
+     * Run migration up
+     * @param name
+     * @returns {Promise<void>}
+     */
+
+  }, {
+    key: 'up',
+    value: async function up(cursorId) {
+      return this.transactionScope(async function (inspector, db) {
+        var files = await inspector.stagedFiles();
+        var filteredList = Command.filterByCursor(files, cursorId, _lodash2.default.first);
+        await doMigrations(db, filteredList, true);
+        return filteredList;
+      });
+    }
+
+    /**
+     * Run migration down
+     * @param name
+     * @returns {Promise<void>}
+     */
+
+  }, {
+    key: 'down',
+    value: async function down(cursorId) {
+      return this.transactionScope(async function (inspector, db) {
+        var files = await inspector.cachedFiles();
+        var filteredList = Command.filterByCursor(files, cursorId, _lodash2.default.last);
+        await doMigrations(db, filteredList, false);
+        return filteredList;
       });
     }
 
@@ -129,8 +225,8 @@ var _class = function () {
      */
 
   }, {
-    key: 'runScope',
-    value: async function runScope(callback) {
+    key: 'transactionScope',
+    value: async function transactionScope(callback) {
       var db = null;
       var result = null;
       _Out2.default.print('Current environment: ' + this.config.environment);
@@ -147,9 +243,33 @@ var _class = function () {
       }
       return result;
     }
+
+    /**
+     * Filter migration all the migrations above cursorId
+     * @param array
+     * @param cursorId
+     * @returns {*}
+     */
+
+  }], [{
+    key: 'filterByCursor',
+    value: function filterByCursor(array, cursorId) {
+      var nextIdFunc = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : _lodash2.default.first;
+
+      if (!array) {
+        return [];
+      }
+      if (!cursorId) {
+        var item = nextIdFunc(array);
+        return item ? [item] : [];
+      }
+      return (0, _lodash2.default)(array).filter(function (it) {
+        return cursorId === 0 || it.id <= cursorId;
+      }).value();
+    }
   }]);
 
-  return _class;
+  return Command;
 }();
 
-exports.default = _class;
+exports.default = Command;

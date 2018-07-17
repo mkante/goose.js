@@ -59,7 +59,7 @@ var _class = function () {
   function _class(params) {
     _classCallCheck(this, _class);
 
-    this.homeDir = _lodash2.default.get(params, 'homeDir');
+    this.homeDir = _lodash2.default.get(params, 'homeDir', '.');
     this.environments = _lodash2.default.get(params, 'environments', {});
     this.environments.default_migration_table = _lodash2.default.get(params, 'environments.default_migration_table', jsonConfigTemplate.environments.default_migration_table);
 

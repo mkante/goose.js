@@ -37,7 +37,8 @@ var migrationNameParser = function migrationNameParser(fileName) {
   var matches = fileName.match(DDL_NAME_MATCHER);
   return {
     id: _lodash2.default.get(matches, '[1]', null),
-    name: _lodash2.default.get(matches, '[2]', null)
+    name: fileName,
+    suffix: _lodash2.default.get(matches, '[2]', null)
   };
 };
 

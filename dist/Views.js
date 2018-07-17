@@ -42,19 +42,15 @@ exports.default = {
     _Out2.default.print('');
     _lodash2.default.each(files, function (it) {
       var formatedDate = '-';
-      var status = '-';
-      var mId = '-';
-      var mName = '-';
+      var mStatus = '-';
+      var mId = it.id;
+      var mName = it.name;
       if (it.date) {
         formatedDate = (0, _dateformat2.default)(it.date, 'yyyy-mm-dd h:MM:ss');
-        status = 'up';
-        mId = it.id;
-        mName = it.name;
-      } else {
-        mName = it;
+        mStatus = it.status;
       }
 
-      _Out2.default.print(column('', C1), column(status, C2), column(mId, C3), column(formatedDate, C4), column(mName));
+      _Out2.default.print(column('', C1), column(mStatus, C2), column(mId, C3), column(formatedDate, C4), column(mName));
     });
     _Out2.default.print('');
   }

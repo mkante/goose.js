@@ -132,6 +132,7 @@ var Handler = function () {
       return this.connection.createTable(tableName, function (table) {
         table.string('id').notNullable();
         table.string('name').notNullable();
+        table.string('status').notNullable();
         table.timestamp('start_time').notNullable();
         table.timestamp('end_time').notNullable();
         table.timestamp('created_at').defaultTo(_this.knex.fn.now()).notNullable();
@@ -157,7 +158,19 @@ var Handler = function () {
   }, {
     key: 'allFiles',
     value: async function allFiles() {
-      return this.knex.orderBy('id', 'desc').orderBy('name', 'desc').orderBy('created_at', 'desc').from(this.mTable);
+      return this.knex.orderBy('id', 'asc').orderBy('name', 'asc').orderBy('created_at', 'asc').from(this.mTable);
+    }
+
+    /**
+     * Select all migrations
+     * @param table
+     * @returns {Promise<void>}
+     */
+
+  }, {
+    key: 'mergedFiles',
+    value: async function mergedFiles() {
+      return this.knex.from(this.mTable).orderBy('id', 'asc').orderBy('name', 'asc').orderBy('created_at', 'asc').where({ status: 'up' });
     }
 
     /**
@@ -180,25 +193,111 @@ var Handler = function () {
 
   }, {
     key: 'exec',
-    value: async function exec(id, filePath, name) {
+    value: async function exec(filePath) {
       var SQL = _FileUtils2.default.read(filePath);
       log.debug('SQL file content: ' + SQL);
 
       var lines = Handler.splitStatements(SQL);
       var startTime = (0, _Helpers.isoFormat)(new Date());
-      for (var i in lines) {
-        // eslint-disable-line
-        var line = lines[i];
-        await this.connection.raw(line); // eslint-disable-line
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = lines[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var line = _step.value;
+          // eslint-disable-line
+          await this.connection.raw(line);
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
       }
+
       var endTime = (0, _Helpers.isoFormat)(new Date());
-      await this.knex.insert({
+      return Promise.resolve({
+        startTime: startTime,
+        endTime: endTime,
+        lines: lines.length
+      });
+    }
+
+    /**
+     * Merge migration.
+     * @param id
+     * @param filePath
+     * @param name
+     * @returns {Promise<*>}
+     */
+
+  }, {
+    key: 'merge',
+    value: async function merge(id, filePath, name) {
+      var _ref = await this.exec(filePath),
+          startTime = _ref.startTime,
+          endTime = _ref.endTime;
+
+      var UP = 'up';
+
+      if (await this.migrationIDExists(id)) {
+        return this.knex(this.mTable).where({ id: id }).update({
+          status: UP,
+          start_time: startTime,
+          end_time: endTime
+        });
+      }
+
+      return this.knex(this.mTable).insert({
         id: id,
         name: name,
+        status: UP,
         start_time: startTime,
         end_time: endTime
-      }).into(this.mTable);
-      return Promise.resolve(lines.length);
+      });
+    }
+
+    /**
+     * Revert
+     * @param id
+     * @param filePath
+     * @returns {Promise<*>}
+     */
+
+  }, {
+    key: 'revert',
+    value: async function revert(id, filePath) {
+      var _ref2 = await this.exec(filePath),
+          startTime = _ref2.startTime,
+          endTime = _ref2.endTime;
+
+      return this.knex(this.mTable).update({
+        status: 'down',
+        start_time: startTime,
+        end_time: endTime
+      }).where({ id: id });
+    }
+
+    /**
+     * Check if migration exists.
+     * @param id
+     * @returns {Promise<boolean>}
+     */
+
+  }, {
+    key: 'migrationIDExists',
+    value: async function migrationIDExists(id) {
+      var row = await this.knex(this.mTable).where({ id: id }).select().first();
+      return row !== undefined;
     }
 
     /**

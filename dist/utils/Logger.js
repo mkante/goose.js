@@ -12,6 +12,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = function (name) {
   var log = _log4js2.default.getLogger(name);
-  log.level = 'DEBUG';
+  log.level = process.env.NODE_LEVEL;
   return log;
 };

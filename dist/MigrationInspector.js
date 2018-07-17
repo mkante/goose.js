@@ -10,6 +10,10 @@ var _lodash = require('lodash');
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
+var _path = require('path');
+
+var _path2 = _interopRequireDefault(_path);
+
 var _FileUtils = require('./utils/FileUtils');
 
 var _FileUtils2 = _interopRequireDefault(_FileUtils);
@@ -35,10 +39,23 @@ var rowAdaptor = function f(row) {
   return {
     id: row.id,
     name: row.name,
+    status: row.status,
     startTime: row.start_time,
     endTime: row.end_time,
     date: row.created_at
   };
+};
+
+/**
+ * Add up and down SQL files path
+ * @param rootDir
+ * @param it
+ * @returns {*}
+ */
+var addUpDownFiles = function addUpDownFiles(rootDir, it) {
+  _lodash2.default.set(it, 'sqlUpFile', _path2.default.join(rootDir, it.name, 'up.sql'));
+  _lodash2.default.set(it, 'sqlDownFile', _path2.default.join(rootDir, it.name, 'down.sql'));
+  return it;
 };
 
 var _class = function () {
@@ -57,9 +74,14 @@ var _class = function () {
   _createClass(_class, [{
     key: 'localFiles',
     value: async function localFiles() {
+      var _this = this;
+
       var files = _FileUtils2.default.files(this.folder, _Helpers.DDL_NAME_MATCHER, false);
       // sort files
-      return sortByDate(files);
+      files = sortByDate(files);
+      return (0, _lodash2.default)(files).map(_Helpers.migrationNameParser).map(function (it) {
+        return addUpDownFiles(_this.folder, it);
+      }).value();
     }
 
     /**
@@ -69,8 +91,12 @@ var _class = function () {
   }, {
     key: 'cachedFiles',
     value: async function cachedFiles() {
+      var _this2 = this;
+
       var rows = await this.db.allFiles();
-      return (0, _lodash2.default)(rows).map(rowAdaptor).value();
+      return (0, _lodash2.default)(rows).map(rowAdaptor).map(function (it) {
+        return addUpDownFiles(_this2.folder, it);
+      }).value();
     }
 
     /**
@@ -81,12 +107,63 @@ var _class = function () {
     key: 'freshFiles',
     value: async function freshFiles() {
       var cachedFiles = await this.cachedFiles();
-      var cachedNames = (0, _lodash2.default)(cachedFiles).map(function (it) {
+      var exclude = (0, _lodash2.default)(cachedFiles).map(function (it) {
         return it.name;
       }).value();
       var localFiles = await this.localFiles();
       return (0, _lodash2.default)(localFiles).filter(function (it) {
-        return !cachedNames.includes(it);
+        return !exclude.includes(it.name);
+      }).value();
+    }
+
+    /**
+     * Returns merged migrations
+     */
+
+  }, {
+    key: 'mergedFiles',
+    value: async function mergedFiles() {
+      var rows = await this.cachedFiles();
+      return (0, _lodash2.default)(rows).filter(function (it) {
+        return it.status === 'up';
+      }).value();
+    }
+
+    /**
+     * Returns reverted migrations
+     */
+
+  }, {
+    key: 'revertedFiles',
+    value: async function revertedFiles() {
+      var rows = await this.cachedFiles();
+      return (0, _lodash2.default)(rows).filter(function (it) {
+        return it.status !== 'up';
+      }).value();
+    }
+
+    /**
+     * Returns files ready for migration
+     */
+
+  }, {
+    key: 'stagedFiles',
+    value: async function stagedFiles() {
+      var mergedFiles = await this.mergedFiles();
+      var exclude = (0, _lodash2.default)(mergedFiles).map(function (it) {
+        return it.name;
+      }).value();
+
+      var revertedFiles = await this.revertedFiles();
+      var localFiles = await this.localFiles();
+
+      var group = revertedFiles.concat(localFiles);
+      return (0, _lodash2.default)(group).filter(function (it) {
+        return !exclude.includes(it.name);
+      }).uniqBy(function (it) {
+        return it.id;
+      }).sortBy(function (it) {
+        return it.id;
       }).value();
     }
   }]);

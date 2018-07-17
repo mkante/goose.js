@@ -29,7 +29,7 @@ const jsonConfigTemplate = {
 
 export default class {
   constructor(params) {
-    this.homeDir = _.get(params, 'homeDir');
+    this.homeDir = _.get(params, 'homeDir', '.');
     this.environments = _.get(params, 'environments', {});
     this.environments.default_migration_table = _.get(params,
       'environments.default_migration_table',
