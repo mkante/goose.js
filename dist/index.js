@@ -36,14 +36,14 @@ var _FileUtils2 = _interopRequireDefault(_FileUtils);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var log = (0, _Logger2.default)(__filename);
-var CONF_FILE = _path2.default.join('.', 'goose.json');
+var CONF_FILE = _path2.default.join('.', 'goosefile.json');
 
 /**
  * Create command instance
  * @param arg
  * @returns {Command}
  */
-var createInstance = function createInstance(arg) {
+var createInstance = async function createInstance(arg) {
   var conf = arg.conf,
       env = arg.env;
 
@@ -53,10 +53,9 @@ var createInstance = function createInstance(arg) {
   if (!_FileUtils2.default.isFile(conf)) {
     throw new Error('Config file is missing');
   }
-  var config = _ConfigProperties2.default.readFile(conf);
+  var config = await _ConfigProperties2.default.from(conf);
   config.environment = env || config.defaultDatabase;
   config.homeDir = homeDir;
-  _Out2.default.info('Using environment: ' + config.environment + '\n');
 
   return new _Command2.default(config);
 };
@@ -98,7 +97,7 @@ var Handler = {
    */
   create: function create(arg) {
     return safe(async function () {
-      var cmd = createInstance(arg);
+      var cmd = await createInstance(arg);
       await cmd.create(arg.name);
     });
   },
@@ -110,7 +109,7 @@ var Handler = {
    */
   status: function status(arg) {
     return safe(async function () {
-      var cmd = createInstance(arg);
+      var cmd = await createInstance(arg);
       await cmd.status();
     });
   },
@@ -122,7 +121,7 @@ var Handler = {
    */
   up: function up(arg) {
     return safe(async function () {
-      var cmd = createInstance(arg);
+      var cmd = await createInstance(arg);
       return cmd.up(arg.timestamp);
     });
   },
@@ -134,7 +133,7 @@ var Handler = {
    */
   down: function down(arg) {
     return safe(async function () {
-      var cmd = createInstance(arg);
+      var cmd = await createInstance(arg);
       await cmd.down(arg.timestamp);
     });
   }

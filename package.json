@@ -1,12 +1,14 @@
 {
   "name": "goose",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "CLI command for database migration",
+  "bin": {
+    "goose.js": "./dist/index.js"
+  },
   "scripts": {
-    "build": "babel src -d dist",
+    "babel": "babel src -d dist",
     "linter": "eslint --ext .js src",
-    "dist": "npm run linter && npm run test && npm run build",
+    "build": "npm run linter && npm run test && npm run babel",
     "test": "mocha --recursive './test/**/*.spec.js' "
   },
   "author": "",

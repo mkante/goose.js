@@ -57,9 +57,9 @@ export default class Command {
     out.print('Initializing respository');
     try {
       let confContent = templateConfig;
-      let confFile = Path.join(homeDir, 'config.json');
+      let confFile = Path.join(homeDir, 'goosefile.json');
       if (`${format}`.toLowerCase() === 'yaml') {
-        confFile = Path.join(homeDir, 'config.yml');
+        confFile = Path.join(homeDir, 'goosefile.yml');
         confContent = templateConfigYAML;
       }
 
@@ -147,7 +147,7 @@ export default class Command {
   async transactionScope(callback) {
     let db = null;
     let result = null;
-    out.print(`Current environment: ${this.config.environment}`);
+    out.info(`Using environment: ${this.config.environment}`);
     const dbConfig = this.config.database;
     const migrationDir = this.config.paths.migrations;
     try {

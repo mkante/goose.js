@@ -13,10 +13,11 @@ const log = Logger(__filename);
  * @param params
  * @returns {*}
  */
-const getConnecionConfig = (provider, params) => {
+const getConnecionConfig = (adapter, params) => {
   const map = {
     mysql: {
       client: 'mysql',
+      version: '5.6',
       connection: {
         host: _.get(params, 'host'),
         port: _.get(params, 'port'),
@@ -43,7 +44,7 @@ const getConnecionConfig = (provider, params) => {
       },
     },
   };
-  return map[provider];
+  return map[adapter];
 };
 
 export default class Handler {
@@ -53,14 +54,14 @@ export default class Handler {
    * @param params
    */
   static async create(params) {
-    const { provider } = params;
-    if (!Handler.validProvider(provider)) {
-      throw new DBInvalidProvider(`Wrong database provider ${provider}`);
+    const { adapter } = params;
+    if (!Handler.validAdapter(adapter)) {
+      throw new DBInvalidProvider(`Wrong database provider: ${adapter}`);
     }
 
     const instance = new Handler();
-    instance.provider = provider;
-    instance.config = getConnecionConfig(provider, params);
+    instance.provider = adapter;
+    instance.config = getConnecionConfig(adapter, params);
     instance.mTable = 'goose_migrations';
     instance.knex = knex(instance.config);
     await instance.initializeTable();
@@ -72,8 +73,8 @@ export default class Handler {
    * @param provider
    * @returns {boolean}
    */
-  static validProvider(provider) {
-    return /(mysql)|(sqlite)|(pgsql)/.test(`${provider}`.toLowerCase());
+  static validAdapter(adapter) {
+    return /(mysql)|(sqlite)|(pgsql)/.test(`${adapter}`.toLowerCase());
   }
 
   async initializeTable(tableNameOverride) {
@@ -126,9 +127,7 @@ export default class Handler {
       table.string('status').notNullable();
       table.timestamp('start_time').notNullable();
       table.timestamp('end_time').notNullable();
-      table.timestamp('created_at')
-        .defaultTo(this.knex.fn.now())
-        .notNullable();
+      table.timestamp('created_at').notNullable();
     });
   }
 
@@ -224,6 +223,7 @@ export default class Handler {
       status: UP,
       start_time: startTime,
       end_time: endTime,
+      created_at: endTime,
     });
   }
 

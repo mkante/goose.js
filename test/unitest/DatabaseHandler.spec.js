@@ -8,12 +8,12 @@ const log = Logger(__filename);
 const isoFormatRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
 
 describe(__filename, () => {
-  it('#validProvider', () => {
-    assert.isTrue(!DatabaseHandler.validProvider(), 'no parameter');
-    assert.isTrue(!DatabaseHandler.validProvider('more'), 'Wrong provider');
-    assert.isTrue(DatabaseHandler.validProvider('mySQL'), 'no parameter');
-    assert.isTrue(DatabaseHandler.validProvider('pgsql'), 'no parameter');
-    assert.isTrue(DatabaseHandler.validProvider('sqlite'), 'no parameter');
+  it('#validAdapter', () => {
+    assert.isTrue(!DatabaseHandler.validAdapter(), 'no parameter');
+    assert.isTrue(!DatabaseHandler.validAdapter('more'), 'Wrong provider');
+    assert.isTrue(DatabaseHandler.validAdapter('mySQL'), 'no parameter');
+    assert.isTrue(DatabaseHandler.validAdapter('pgsql'), 'no parameter');
+    assert.isTrue(DatabaseHandler.validAdapter('sqlite'), 'no parameter');
   });
   describe('#create', () => {
     it('New instance', async () => {

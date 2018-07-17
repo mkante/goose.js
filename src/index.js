@@ -9,14 +9,14 @@ import Logger from './utils/Logger';
 import FileUtils from './utils/FileUtils';
 
 const log = Logger(__filename);
-const CONF_FILE = Path.join('.', 'goose.json');
+const CONF_FILE = Path.join('.', 'goosefile.json');
 
 /**
  * Create command instance
  * @param arg
  * @returns {Command}
  */
-const createInstance = (arg) => {
+const createInstance = async (arg) => {
   const { conf, env } = arg;
   const homeDir = Path.dirname(conf);
   out.info(`Using config file: ${conf}`);
@@ -24,10 +24,9 @@ const createInstance = (arg) => {
   if (!FileUtils.isFile(conf)) {
     throw new Error('Config file is missing');
   }
-  const config = ConfigProperties.readFile(conf);
+  const config = await ConfigProperties.from(conf);
   config.environment = env || config.defaultDatabase;
   config.homeDir = homeDir;
-  out.info(`Using environment: ${config.environment}\n`);
 
   return new Command(config);
 };
@@ -66,7 +65,7 @@ const Handler = {
    * @returns {Promise<void>}
    */
   create: arg => safe(async () => {
-    const cmd = createInstance(arg);
+    const cmd = await createInstance(arg);
     await cmd.create(arg.name);
   }),
 
@@ -76,7 +75,7 @@ const Handler = {
    * @returns {Promise<void>}
    */
   status: arg => safe(async () => {
-    const cmd = createInstance(arg);
+    const cmd = await createInstance(arg);
     await cmd.status();
   }),
 
@@ -86,7 +85,7 @@ const Handler = {
    * @returns {Promise<void>}
    */
   up: arg => safe(async () => {
-    const cmd = createInstance(arg);
+    const cmd = await createInstance(arg);
     return cmd.up(arg.timestamp);
   }),
 
@@ -96,7 +95,7 @@ const Handler = {
    * @returns {Promise<void>}
    */
   down: arg => safe(async () => {
-    const cmd = createInstance(arg);
+    const cmd = await createInstance(arg);
     await cmd.down(arg.timestamp);
   }),
 };

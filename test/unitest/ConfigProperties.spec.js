@@ -8,7 +8,7 @@ describe(__filename, () => {
   describe('Constructor', () => {
     const obj = new ConfigProps();
     it('Check default propertis', () => {
-      assert.equal('goose_migrations', obj.defaultMigrationTable);
+      assert.equal(obj.defaultMigrationTable);
       assert.isNull(obj.defaultDatabase);
       assert.isNull(obj.getEnvironmentDatabse('prod'));
       assert.isNull(obj.database);
@@ -30,15 +30,15 @@ describe(__filename, () => {
     });
     it(f2, async () => {
       const data = await ConfigProps.readFile(f2);
-      assert.equal('goose_migrations', data.enviroments.default_migration_table);
+      assert.equal('goose_migrations', data.environments.default_migration_table);
     });
     it(f3, async () => {
       const data = await ConfigProps.readFile(f3);
-      assert.equal('goose_migrations', data.enviroments.default_migration_table);
+      assert.equal('goose_migrations', data.environments.default_migration_table);
     });
     it(f4, async () => {
       const data = await ConfigProps.readFile(f4);
-      assert.equal('goose_migrations', data.enviroments.default_migration_table);
+      assert.equal('goose_migrations', data.environments.default_migration_table);
     });
     it(badJson, async () => {
       try {
@@ -48,6 +48,16 @@ describe(__filename, () => {
         log.error(e.message);
         assert.isOk(/Unexpected token/.test(e.message));
       }
+    });
+  });
+
+  describe('#from', () => {
+    it('Instance from config file', async () => {
+      const f1 = `${__dirname}/../resources/config1.json`;
+      const conf = await ConfigProps.from(f1);
+      assert.equal('goose_migrations', conf.defaultMigrationTable);
+      assert.isNull(conf.database);
+      assert.isNull(conf.environment);
     });
   });
 });

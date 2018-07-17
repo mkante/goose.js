@@ -30,7 +30,7 @@ describe(__filename, () => {
       const files = FileUtils.files(tmpDir);
       log.info(`Init directory content: ${files}`);
       assert.isTrue(files.length > 0, 'Directory not empty');
-      assert.isTrue(FileUtils.isFile(`${tmpDir}/config.json`), 'config.js file exists');
+      assert.isTrue(FileUtils.isFile(`${tmpDir}/goosefile.json`), 'goosefile.json file exists');
       assert.isTrue(FileUtils.isDir(`${tmpDir}/db`), '/db folder exists');
     });
 
@@ -43,7 +43,7 @@ describe(__filename, () => {
       const files = FileUtils.files(tmpDir);
       log.info(`Init directory content: ${files}`);
       assert.isTrue(files.length > 0, 'Directory not empty');
-      assert.isTrue(FileUtils.isFile(`${tmpDir}/config.yml`), 'config.js file exists');
+      assert.isTrue(FileUtils.isFile(`${tmpDir}/goosefile.yml`), 'goosefile.yml file exists');
       assert.isTrue(FileUtils.isDir(`${tmpDir}/db`), '/db folder exists');
     });
   });

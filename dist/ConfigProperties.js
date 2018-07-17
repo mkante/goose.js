@@ -55,13 +55,15 @@ var jsonConfigTemplate = {
   }
 };
 
-var _class = function () {
-  function _class(params) {
-    _classCallCheck(this, _class);
+var Config = function () {
+  function Config(params) {
+    _classCallCheck(this, Config);
 
     this.homeDir = _lodash2.default.get(params, 'homeDir', '.');
     this.environments = _lodash2.default.get(params, 'environments', {});
-    this.environments.default_migration_table = _lodash2.default.get(params, 'environments.default_migration_table', jsonConfigTemplate.environments.default_migration_table);
+    this.environments.default_migration_table = _lodash2.default.get(params, 'environments.default_migration_table');
+
+    this.environments.default_database = _lodash2.default.get(params, 'environments.default_database');
 
     this.paths = {
       migrations: _lodash2.default.get(params, 'paths.migrations', 'db/migrations'),
@@ -70,7 +72,7 @@ var _class = function () {
     this.environment = null;
   }
 
-  _createClass(_class, [{
+  _createClass(Config, [{
     key: 'getEnvironmentDatabse',
     value: function getEnvironmentDatabse(env) {
       return _lodash2.default.get(this.environments, env, null);
@@ -119,7 +121,7 @@ var _class = function () {
     key: 'from',
     value: async function from(filePath) {
       var data = await this.readFile(filePath);
-      return new this.constructor(data);
+      return new Config(data);
     }
   }, {
     key: 'readFile',
@@ -131,7 +133,10 @@ var _class = function () {
 
       var parsedObj = null;
 
-      if (/\.(json)|(js)$/.test(filePath)) {
+      if (/\.json$/.test(filePath)) {
+        // read json file
+        parsedObj = JSON.parse(_FileUtils2.default.read(filePath));
+      } else if (/\.js$/.test(filePath)) {
         // read json file
         parsedObj = require(filePath); // eslint-disable-line
       } else if (/\.yml$/.test(filePath)) {
@@ -144,7 +149,7 @@ var _class = function () {
     }
   }]);
 
-  return _class;
+  return Config;
 }();
 
-exports.default = _class;
+exports.default = Config;

@@ -121,9 +121,9 @@ var Command = function () {
       _Out2.default.print('Initializing respository');
       try {
         var confContent = templateConfig;
-        var confFile = _path2.default.join(homeDir, 'config.json');
+        var confFile = _path2.default.join(homeDir, 'goosefile.json');
         if (('' + format).toLowerCase() === 'yaml') {
-          confFile = _path2.default.join(homeDir, 'config.yml');
+          confFile = _path2.default.join(homeDir, 'goosefile.yml');
           confContent = templateConfigYAML;
         }
 
@@ -229,7 +229,7 @@ var Command = function () {
     value: async function transactionScope(callback) {
       var db = null;
       var result = null;
-      _Out2.default.print('Current environment: ' + this.config.environment);
+      _Out2.default.info('Using environment: ' + this.config.environment);
       var dbConfig = this.config.database;
       var migrationDir = this.config.paths.migrations;
       try {

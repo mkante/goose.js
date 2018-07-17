@@ -38,10 +38,11 @@ var log = (0, _Logger2.default)(__filename);
  * @param params
  * @returns {*}
  */
-var getConnecionConfig = function getConnecionConfig(provider, params) {
+var getConnecionConfig = function getConnecionConfig(adapter, params) {
   var map = {
     mysql: {
       client: 'mysql',
+      version: '5.6',
       connection: {
         host: _lodash2.default.get(params, 'host'),
         port: _lodash2.default.get(params, 'port'),
@@ -68,7 +69,7 @@ var getConnecionConfig = function getConnecionConfig(provider, params) {
       }
     }
   };
-  return map[provider];
+  return map[adapter];
 };
 
 var Handler = function () {
@@ -127,15 +128,13 @@ var Handler = function () {
   }, {
     key: 'createMigrationTable',
     value: async function createMigrationTable(tableName) {
-      var _this = this;
-
       return this.connection.createTable(tableName, function (table) {
         table.string('id').notNullable();
         table.string('name').notNullable();
         table.string('status').notNullable();
         table.timestamp('start_time').notNullable();
         table.timestamp('end_time').notNullable();
-        table.timestamp('created_at').defaultTo(_this.knex.fn.now()).notNullable();
+        table.timestamp('created_at').notNullable();
       });
     }
 
@@ -262,7 +261,8 @@ var Handler = function () {
         name: name,
         status: UP,
         start_time: startTime,
-        end_time: endTime
+        end_time: endTime,
+        created_at: endTime
       });
     }
 
@@ -320,15 +320,15 @@ var Handler = function () {
      * @param params
      */
     value: async function create(params) {
-      var provider = params.provider;
+      var adapter = params.adapter;
 
-      if (!Handler.validProvider(provider)) {
-        throw new _Error.DBInvalidProvider('Wrong database provider ' + provider);
+      if (!Handler.validAdapter(adapter)) {
+        throw new _Error.DBInvalidProvider('Wrong database provider: ' + adapter);
       }
 
       var instance = new Handler();
-      instance.provider = provider;
-      instance.config = getConnecionConfig(provider, params);
+      instance.provider = adapter;
+      instance.config = getConnecionConfig(adapter, params);
       instance.mTable = 'goose_migrations';
       instance.knex = (0, _knex2.default)(instance.config);
       await instance.initializeTable();
@@ -342,9 +342,9 @@ var Handler = function () {
      */
 
   }, {
-    key: 'validProvider',
-    value: function validProvider(provider) {
-      return (/(mysql)|(sqlite)|(pgsql)/.test(('' + provider).toLowerCase())
+    key: 'validAdapter',
+    value: function validAdapter(adapter) {
+      return (/(mysql)|(sqlite)|(pgsql)/.test(('' + adapter).toLowerCase())
       );
     }
   }, {
