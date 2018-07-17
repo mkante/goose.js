@@ -18,12 +18,15 @@ const CONF_FILE = Path.join('.', 'goose.json');
  */
 const createInstance = (arg) => {
   const { conf, env } = arg;
+  const homeDir = Path.dirname(conf);
   out.info(`Using config file: ${conf}`);
+  out.info(`Using home folder: ${homeDir}`);
   if (!FileUtils.isFile(conf)) {
     throw new Error('Config file is missing');
   }
   const config = ConfigProperties.readFile(conf);
   config.environment = env || config.defaultDatabase;
+  config.homeDir = homeDir;
   out.info(`Using environment: ${config.environment}\n`);
 
   return new Command(config);
