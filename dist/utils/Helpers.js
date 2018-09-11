@@ -21,7 +21,7 @@ var uniqScriptName = function uniqScriptName(defaultSuffix, suffix) {
   var nameSuffix = !suffix ? defaultSuffix : suffix.trim();
   var date = new Date();
   var millisec = date.getTime();
-  var name = (0, _dateformat2.default)(date, 'yyyy_MM_dd') + '_' + millisec + '_' + nameSuffix;
+  var name = (0, _dateformat2.default)(date, 'yyyy_mm_dd') + '_' + millisec + '_' + nameSuffix;
   return name;
 };
 

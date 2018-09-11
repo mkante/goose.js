@@ -7,7 +7,7 @@ const uniqScriptName = (defaultSuffix, suffix) => {
   const nameSuffix = !suffix ? defaultSuffix : suffix.trim();
   const date = new Date();
   const millisec = date.getTime();
-  const name = `${dateformat(date, 'yyyy_MM_dd')}_${millisec}_${nameSuffix}`;
+  const name = `${dateformat(date, 'yyyy_mm_dd')}_${millisec}_${nameSuffix}`;
   return name;
 };
 
