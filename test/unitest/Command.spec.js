@@ -94,15 +94,16 @@ describe(__filename, () => {
       const list = Command.filterByCursor();
       assert.equal(0, list.length);
     });
-    it('cursorId === undefined', () => {
+    it('cursorId === null', () => {
       const list = Command.filterByCursor([{ id: 10 }, { id: 11 }]);
       assert.equal(1, list.length);
       assert.equal(10, list[0].id);
     });
     it('cursorId === 0', () => {
       const list = Command.filterByCursor([{ id: 100 }, { id: 200 }], 0);
-      assert.equal(1, list.length);
+      assert.equal(2, list.length);
       assert.equal(100, list[0].id);
+      assert.equal(200, list[1].id);
     });
     it('cursorId === 5', () => {
       const list = Command.filterByCursor([{ id: 2 }, { id: 5 }, { id: 6 }], 5);

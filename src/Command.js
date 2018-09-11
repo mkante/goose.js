@@ -174,7 +174,7 @@ export default class Command {
     if (!array) {
       return [];
     }
-    if (!cursorId) {
+    if (cursorId == null) {
       const item = nextIdFunc(array);
       return item ? [item] : [];
     }

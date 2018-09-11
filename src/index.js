@@ -111,7 +111,7 @@ const { argv } = Yarg
   // create command
   .command('create [name]', 'Create new migration file',
     opts => opts.option('timestamp', {
-      default: 0,
+      default: null,
       alias: 't',
       description: 'Timestamp',
     }),

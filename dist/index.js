@@ -149,7 +149,7 @@ var _Yarg$usage$command$c = _yargs2.default.usage('Usage: $0 <command> [options]
 // create command
 .command('create [name]', 'Create new migration file', function (opts) {
   return opts.option('timestamp', {
-    default: 0,
+    default: null,
     alias: 't',
     description: 'Timestamp'
   });

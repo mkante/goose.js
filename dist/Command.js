@@ -264,7 +264,7 @@ var Command = function () {
       if (!array) {
         return [];
       }
-      if (!cursorId) {
+      if (cursorId == null) {
         var item = nextIdFunc(array);
         return item ? [item] : [];
       }
