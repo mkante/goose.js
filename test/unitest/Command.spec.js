@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import FileUtils from '../../src/utils/FileUtils';
-import Command from '../../src/Command';
+import { default as Command, MigrateDirection } from '../../src/Command';
 import Logger from '../../src/utils/Logger';
 import ConfigProperties from '../../src/ConfigProperties';
 import {
@@ -86,30 +86,6 @@ describe(__filename, () => {
       assert.equal(0, result.cachedFiles.length);
       assert.equal(3, result.freshFiles.length);
       db.close();
-    });
-  });
-
-  describe('#filterByCursor', () => {
-    it('array === undefined && cursorId === undefined', () => {
-      const list = Command.filterByCursor();
-      assert.equal(0, list.length);
-    });
-    it('cursorId === null', () => {
-      const list = Command.filterByCursor([{ id: 10 }, { id: 11 }]);
-      assert.equal(1, list.length);
-      assert.equal(10, list[0].id);
-    });
-    it('cursorId === 0', () => {
-      const list = Command.filterByCursor([{ id: 100 }, { id: 200 }], 0);
-      assert.equal(2, list.length);
-      assert.equal(100, list[0].id);
-      assert.equal(200, list[1].id);
-    });
-    it('cursorId === 5', () => {
-      const list = Command.filterByCursor([{ id: 2 }, { id: 5 }, { id: 6 }], 5);
-      assert.equal(2, list.length);
-      assert.equal(2, list[0].id);
-      assert.equal(5, list[1].id);
     });
   });
 

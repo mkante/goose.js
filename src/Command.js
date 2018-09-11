@@ -7,6 +7,7 @@ import { makeDDLName } from './utils/Helpers';
 import ConfigProperties from './ConfigProperties';
 import Views from './Views';
 import out from './utils/Out';
+import MigrationCursor from './MigrationCursor';
 
 /**
  * TODO: I don't like this method signature find a better way
@@ -120,7 +121,8 @@ export default class Command {
   async up(cursorId) {
     return this.transactionScope(async (inspector, db) => {
       const files = await inspector.stagedFiles();
-      const filteredList = Command.filterByCursor(files, cursorId, _.first);
+      const cursor = new MigrationCursor(cursorId);
+      const filteredList = cursor.upList(files);
       await doMigrations(db, filteredList, true);
       return filteredList;
     });
@@ -134,7 +136,8 @@ export default class Command {
   async down(cursorId) {
     return this.transactionScope(async (inspector, db) => {
       const files = await inspector.mergedFiles();
-      const filteredList = Command.filterByCursor(files, cursorId, _.last);
+      const cursor = new MigrationCursor(cursorId);
+      const filteredList = cursor.downList(files);
       await doMigrations(db, filteredList, false);
       return filteredList;
     });
@@ -164,22 +167,5 @@ export default class Command {
       throw e;
     }
     return result;
-  }
-
-  /**
-   * Filter migration all the migrations above cursorId
-   * @param array
-   * @param cursorId
-   * @returns {*}
-   */
-  static filterByCursor(array, cursorId, nextIdFunc = _.first) {
-    if (!array) {
-      return [];
-    }
-    if (cursorId == null) {
-      const item = nextIdFunc(array);
-      return item ? [item] : [];
-    }
-    return _(array).filter(it => (cursorId === 0) || (it.id <= cursorId)).value();
   }
 }

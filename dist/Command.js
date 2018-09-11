@@ -40,6 +40,10 @@ var _Out = require('./utils/Out');
 
 var _Out2 = _interopRequireDefault(_Out);
 
+var _MigrationCursor = require('./MigrationCursor');
+
+var _MigrationCursor2 = _interopRequireDefault(_MigrationCursor);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -179,7 +183,7 @@ var Command = function () {
           return it.id;
         }).sortBy(function (it) {
           return it.id;
-        }).value();
+        }).value().reverse(); // Reverse to show more natural display order
         _Views2.default.printStatus(consolidate);
 
         return { cachedFiles: cachedFiles, freshFiles: freshFiles, mergeFiles: mergeFiles };
@@ -197,7 +201,8 @@ var Command = function () {
     value: async function up(cursorId) {
       return this.transactionScope(async function (inspector, db) {
         var files = await inspector.stagedFiles();
-        var filteredList = Command.filterByCursor(files, cursorId, _lodash2.default.first);
+        var cursor = new _MigrationCursor2.default(cursorId);
+        var filteredList = cursor.upList(files);
         await doMigrations(db, filteredList, true);
         return filteredList;
       });
@@ -214,7 +219,8 @@ var Command = function () {
     value: async function down(cursorId) {
       return this.transactionScope(async function (inspector, db) {
         var files = await inspector.mergedFiles();
-        var filteredList = Command.filterByCursor(files, cursorId, _lodash2.default.last);
+        var cursor = new _MigrationCursor2.default(cursorId);
+        var filteredList = cursor.downList(files);
         await doMigrations(db, filteredList, false);
         return filteredList;
       });
@@ -248,30 +254,6 @@ var Command = function () {
         throw e;
       }
       return result;
-    }
-
-    /**
-     * Filter migration all the migrations above cursorId
-     * @param array
-     * @param cursorId
-     * @returns {*}
-     */
-
-  }], [{
-    key: 'filterByCursor',
-    value: function filterByCursor(array, cursorId) {
-      var nextIdFunc = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : _lodash2.default.first;
-
-      if (!array) {
-        return [];
-      }
-      if (cursorId == null) {
-        var item = nextIdFunc(array);
-        return item ? [item] : [];
-      }
-      return (0, _lodash2.default)(array).filter(function (it) {
-        return cursorId === 0 || it.id <= cursorId;
-      }).value();
     }
   }]);
 
