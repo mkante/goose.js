@@ -3,6 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.jsonConfigTemplate = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -45,7 +46,8 @@ var jsonConfigTemplate = {
       user: 'root',
       pass: '',
       port: 3306,
-      charset: 'utf8'
+      charset: 'utf8',
+      database: ''
       // collation: 'utf8_unicode_ci',
     }
   },
@@ -55,42 +57,35 @@ var jsonConfigTemplate = {
   }
 };
 
+exports.jsonConfigTemplate = jsonConfigTemplate;
+
 var Config = function () {
   function Config(params) {
     _classCallCheck(this, Config);
 
     this.homeDir = _lodash2.default.get(params, 'homeDir', '.');
+
     this.environments = _lodash2.default.get(params, 'environments', {});
-    this.environments.default_migration_table = _lodash2.default.get(params, 'environments.default_migration_table');
+    this.environments.default_migration_table = _lodash2.default.get(params, 'environments.default_migration_table', jsonConfigTemplate.environments.default_migration_table);
 
     this.environments.default_database = _lodash2.default.get(params, 'environments.default_database');
 
     this.paths = {
-      migrations: _lodash2.default.get(params, 'paths.migrations', 'db/migrations'),
-      seeds: _lodash2.default.get(params, 'paths.seeds', 'db/seeds')
+      migrations: _lodash2.default.get(params, 'paths.migrations', jsonConfigTemplate.paths.migrations),
+      seeds: _lodash2.default.get(params, 'paths.seeds', jsonConfigTemplate.paths.seeds)
     };
     this.environment = null;
   }
 
   _createClass(Config, [{
-    key: 'getEnvironmentDatabse',
-    value: function getEnvironmentDatabse(env) {
-      return _lodash2.default.get(this.environments, env, null);
+    key: 'getEnvironmentDatabase',
+    value: function getEnvironmentDatabase(envName) {
+      return _lodash2.default.get(this.environments, envName, null);
     }
   }, {
     key: 'templateDir',
     get: function get() {
       return _path2.default.join(__dirname, '../template');
-    }
-  }, {
-    key: 'templateConfig',
-    get: function get() {
-      return JSON.stringify(jsonConfigTemplate, null, 2);
-    }
-  }, {
-    key: 'templateConfigYAML',
-    get: function get() {
-      return _json2yaml2.default.stringify(jsonConfigTemplate);
     }
   }, {
     key: 'defaultMigrationTable',
@@ -105,7 +100,7 @@ var Config = function () {
   }, {
     key: 'database',
     get: function get() {
-      return this.getEnvironmentDatabse(this.environment);
+      return this.getEnvironmentDatabase(this.environment);
     }
   }, {
     key: 'migrationsDir',
@@ -118,6 +113,16 @@ var Config = function () {
       return _path2.default.join(this.homeDir, this.paths.seeds);
     }
   }], [{
+    key: 'templateConfig',
+    value: function templateConfig() {
+      return JSON.stringify(jsonConfigTemplate, null, 2);
+    }
+  }, {
+    key: 'templateConfigYAML',
+    value: function templateConfigYAML() {
+      return _json2yaml2.default.stringify(jsonConfigTemplate);
+    }
+  }, {
     key: 'from',
     value: async function from(filePath) {
       var data = await this.readFile(filePath);

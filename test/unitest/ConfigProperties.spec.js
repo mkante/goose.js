@@ -1,19 +1,20 @@
 import { assert } from 'chai';
-import ConfigProps from '../../src/ConfigProperties';
+import { default as ConfigProps, jsonConfigTemplate } from '../../src/ConfigProperties';
 import Logger from '../../src/utils/Logger';
 
 const log = Logger(__filename);
+const envDefault = jsonConfigTemplate.environments;
 
 describe(__filename, () => {
   describe('Constructor', () => {
     const obj = new ConfigProps();
-    it('Check default propertis', () => {
-      assert.equal(obj.defaultMigrationTable);
+    it('Check default properties', () => {
+      assert.equal(obj.defaultMigrationTable, envDefault.default_migration_table);
       assert.isNull(obj.defaultDatabase);
-      assert.isNull(obj.getEnvironmentDatabse('prod'));
+      assert.isNull(obj.getEnvironmentDatabase('prod'));
       assert.isNull(obj.database);
-      assert.equal('db/migrations', obj.paths.migrations);
-      assert.equal('db/seeds', obj.paths.seeds);
+      assert.equal(jsonConfigTemplate.paths.migrations, obj.paths.migrations);
+      assert.equal(jsonConfigTemplate.paths.seeds, obj.paths.seeds);
     });
   });
 

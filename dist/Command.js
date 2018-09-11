@@ -28,6 +28,10 @@ var _MigrationInspector2 = _interopRequireDefault(_MigrationInspector);
 
 var _Helpers = require('./utils/Helpers');
 
+var _ConfigProperties = require('./ConfigProperties');
+
+var _ConfigProperties2 = _interopRequireDefault(_ConfigProperties);
+
 var _Views = require('./Views');
 
 var _Views2 = _interopRequireDefault(_Views);
@@ -113,18 +117,17 @@ var Command = function () {
       var format = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'json';
       var _config = this.config,
           homeDir = _config.homeDir,
-          templateDir = _config.templateDir,
-          templateConfig = _config.templateConfig,
-          templateConfigYAML = _config.templateConfigYAML;
+          templateDir = _config.templateDir;
 
 
       _Out2.default.print('Initializing respository');
       try {
-        var confContent = templateConfig;
+        var confContent = _ConfigProperties2.default.templateConfig();
         var confFile = _path2.default.join(homeDir, 'goosefile.json');
+
         if (('' + format).toLowerCase() === 'yaml') {
           confFile = _path2.default.join(homeDir, 'goosefile.yml');
-          confContent = templateConfigYAML;
+          confContent = _ConfigProperties2.default.templateConfigYAML();
         }
 
         _FileUtils2.default.cp(templateDir, homeDir);

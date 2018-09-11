@@ -4,6 +4,7 @@ import FileUtils from './utils/FileUtils';
 import DatabaseHandler from './DatabaseHandler';
 import Inspector from './MigrationInspector';
 import { makeDDLName } from './utils/Helpers';
+import ConfigProperties from './ConfigProperties';
 import Views from './Views';
 import out from './utils/Out';
 
@@ -50,17 +51,16 @@ export default class Command {
     const {
       homeDir,
       templateDir,
-      templateConfig,
-      templateConfigYAML,
     } = this.config;
 
     out.print('Initializing respository');
     try {
-      let confContent = templateConfig;
+      let confContent = ConfigProperties.templateConfig();
       let confFile = Path.join(homeDir, 'goosefile.json');
+
       if (`${format}`.toLowerCase() === 'yaml') {
         confFile = Path.join(homeDir, 'goosefile.yml');
-        confContent = templateConfigYAML;
+        confContent = ConfigProperties.templateConfigYAML();
       }
 
       FileUtils.cp(templateDir, homeDir);

@@ -32,6 +32,7 @@ goosefile.json
       "user": "test",
       "pass": "test",
       "port": 3306,
+      "database": "",
       "charset": "utf8"
     }
   },
@@ -126,7 +127,8 @@ Goose currently supports the following database adapters natively:
     "host": "localhost",
     "user": "test",
     "pass": "test",
-    "port": 3306
+    "port": 3306,
+    "database": ""
     ```
 - Sqlite: specify the `sqlite` adapter.
     ```javascript 1.8
@@ -141,6 +143,7 @@ Goose currently supports the following database adapters natively:
     "user": "test",
     "pass": "test",
     "port": 3306,
+    "database": ""
     ```
 
 #### Migration Paths

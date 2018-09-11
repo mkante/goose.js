@@ -17,6 +17,7 @@ const jsonConfigTemplate = {
       pass: '',
       port: 3306,
       charset: 'utf8',
+      database: '',
       // collation: 'utf8_unicode_ci',
     },
   },
@@ -26,31 +27,27 @@ const jsonConfigTemplate = {
   },
 };
 
-
+export { jsonConfigTemplate };
 export default class Config {
   constructor(params) {
     this.homeDir = _.get(params, 'homeDir', '.');
+
     this.environments = _.get(params, 'environments', {});
     this.environments.default_migration_table = _.get(params,
-      'environments.default_migration_table');
+      'environments.default_migration_table',
+      jsonConfigTemplate.environments.default_migration_table);
 
     this.environments.default_database = _.get(params,
       'environments.default_database');
 
     this.paths = {
-      migrations: _.get(params, 'paths.migrations', 'db/migrations'),
-      seeds: _.get(params, 'paths.seeds', 'db/seeds'),
+      migrations: _.get(params, 'paths.migrations', jsonConfigTemplate.paths.migrations),
+      seeds: _.get(params, 'paths.seeds', jsonConfigTemplate.paths.seeds),
     };
     this.environment = null;
   }
   get templateDir() {
     return Path.join(__dirname, '../template');
-  }
-  get templateConfig() {
-    return JSON.stringify(jsonConfigTemplate, null, 2);
-  }
-  get templateConfigYAML() {
-    return YAML.stringify(jsonConfigTemplate);
   }
   get defaultMigrationTable() {
     return _.get(this.environments, 'default_migration_table', null);
@@ -58,11 +55,11 @@ export default class Config {
   get defaultDatabase() {
     return _.get(this.environments, 'default_database', null);
   }
-  getEnvironmentDatabse(env) {
-    return _.get(this.environments, env, null);
+  getEnvironmentDatabase(envName) {
+    return _.get(this.environments, envName, null);
   }
   get database() {
-    return this.getEnvironmentDatabse(this.environment);
+    return this.getEnvironmentDatabase(this.environment);
   }
   get migrationsDir() {
     return Path.join(this.homeDir, this.paths.migrations);
@@ -70,6 +67,14 @@ export default class Config {
   get seedsDir() {
     return Path.join(this.homeDir, this.paths.seeds);
   }
+
+  static templateConfig() {
+    return JSON.stringify(jsonConfigTemplate, null, 2);
+  }
+  static templateConfigYAML() {
+    return YAML.stringify(jsonConfigTemplate);
+  }
+
   static async from(filePath) {
     const data = await this.readFile(filePath);
     return new Config(data);
