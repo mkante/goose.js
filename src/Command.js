@@ -104,7 +104,8 @@ export default class Command {
       let consolidate = cachedFiles.concat(freshFiles);
       consolidate = _(consolidate).uniqBy(it => it.id)
         .sortBy(it => it.id)
-        .value();
+        .value()
+        .reverse(); // Reverse to show more natural display order
       Views.printStatus(consolidate);
 
       return { cachedFiles, freshFiles, mergeFiles };
