@@ -61,7 +61,7 @@ CREATE USERS (
 ```
 
 ##### Migrate down
-The `down.sql` file is automatically run by Phinx when you are migrating down and it detects the given migration has been executed in the past. You should use the `down` command to reverse/undo the transformations described in the `up.sql`.
+The `down.sql` file is automatically run by goose when you are migrating down and it detects the given migration has been executed in the past. You should use the `down` command to reverse/undo the transformations described in the `up.sql`.
 ```SQL
 -- Inside down.sql
 
