@@ -58,6 +58,10 @@ CREATE USERS (
     id INT,
     name VARCHAR(200)
 );
+CREATE friends (
+    user_id INT,
+    friend_id INT
+);
 ```
 
 ##### Migrate down
@@ -66,6 +70,7 @@ The `down.sql` file is automatically run by goose when you are migrating down an
 -- Inside down.sql
 
 DROP TABLE users;
+DROP TABLE friends;
 ```
 
 ### Configuration File Parameter
@@ -150,6 +155,17 @@ Goose uses `db/migrations` by default as the path to your migrations directory. 
 > INPORTANT: The migration path is always relative to the project root
 
 ### Commands
+##### Help command
+The help command shows all supported commands with a short short description. 
+```Bash
+goose.js help
+```
+
+To know a specific command usage pass the help subcommand.
+```Bash
+goose.js init help
+goose.js up help
+``` 
 
 ##### Init command
 The Init command (short for initialize) is used to prepare your project for goose. This command generates the `goosefile.json` file in the root of your project directory.
