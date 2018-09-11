@@ -84,7 +84,6 @@ When you initialize your project using the `init` Command, goose creates a defau
       charset: "utf8"
   paths: 
     migrations: "db/migrations"
-    seeds: "db/seeds"
 ```
 goose auto-detects which language parser to use for files with *.yml, *.json extensions.
 
@@ -139,7 +138,16 @@ Goose currently supports the following database adapters natively:
     "port": 3306,
     ```
 
+#### Migration Paths
+Goose uses `db/migrations` by default as the path to your migrations directory. In order to overwrite the default location, you need to add the following to the yaml configuration.
 
+```javascript 1.8
+"paths": {
+    "migrations": "db/custom/path/migrations",
+  }
+```
+
+> INPORTANT: The migration path is always relative to the project root
 
 ### Commands
 
