@@ -54,11 +54,11 @@ The `up.sql` file is automatically run when you are migrating up and it detects 
 ```SQL
 -- Inside up.sql
 
-CREATE USERS (
+CREATE TABLE users (
     id INT,
     name VARCHAR(200)
 );
-CREATE friends (
+CREATE TABLE friends (
     user_id INT,
     friend_id INT
 );
@@ -158,13 +158,13 @@ Goose uses `db/migrations` by default as the path to your migrations directory. 
 ##### Help command
 The help command shows all supported commands with a short short description. 
 ```Bash
-goose.js help
+$ goose.js help
 ```
 
 To know a specific command usage pass the help subcommand.
 ```Bash
-goose.js init help
-goose.js up help
+$ goose.js init help
+$ goose.js up help
 ``` 
 
 ##### Init command
