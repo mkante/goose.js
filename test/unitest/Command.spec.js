@@ -171,9 +171,15 @@ describe(__filename, () => {
 
       status = await cmd.status();
       assert.equal(2, status.cachedFiles.length);
+      assert.equal(1, status.mergeFiles.length);
       assert.equal('up', status.cachedFiles[0].status);
       assert.equal('down', status.cachedFiles[1].status);
       assert.equal(1, status.freshFiles.length);
+
+      await cmd.down();
+      status = await cmd.status();
+      assert.equal(0, status.mergeFiles.length);
+
       db.close();
     });
   });

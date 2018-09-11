@@ -99,6 +99,7 @@ export default class Command {
     return this.transactionScope(async (inspector) => {
       const cachedFiles = await inspector.cachedFiles();
       const freshFiles = await inspector.freshFiles();
+      const mergeFiles = await inspector.mergedFiles();
 
       let consolidate = cachedFiles.concat(freshFiles);
       consolidate = _(consolidate).uniqBy(it => it.id)
@@ -106,7 +107,7 @@ export default class Command {
         .value();
       Views.printStatus(consolidate);
 
-      return { cachedFiles, freshFiles };
+      return { cachedFiles, freshFiles, mergeFiles };
     });
   }
 
@@ -131,7 +132,7 @@ export default class Command {
    */
   async down(cursorId) {
     return this.transactionScope(async (inspector, db) => {
-      const files = await inspector.cachedFiles();
+      const files = await inspector.mergedFiles();
       const filteredList = Command.filterByCursor(files, cursorId, _.last);
       await doMigrations(db, filteredList, false);
       return filteredList;

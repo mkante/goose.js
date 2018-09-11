@@ -172,6 +172,7 @@ var Command = function () {
       return this.transactionScope(async function (inspector) {
         var cachedFiles = await inspector.cachedFiles();
         var freshFiles = await inspector.freshFiles();
+        var mergeFiles = await inspector.mergedFiles();
 
         var consolidate = cachedFiles.concat(freshFiles);
         consolidate = (0, _lodash2.default)(consolidate).uniqBy(function (it) {
@@ -181,7 +182,7 @@ var Command = function () {
         }).value();
         _Views2.default.printStatus(consolidate);
 
-        return { cachedFiles: cachedFiles, freshFiles: freshFiles };
+        return { cachedFiles: cachedFiles, freshFiles: freshFiles, mergeFiles: mergeFiles };
       });
     }
 
@@ -212,7 +213,7 @@ var Command = function () {
     key: 'down',
     value: async function down(cursorId) {
       return this.transactionScope(async function (inspector, db) {
-        var files = await inspector.cachedFiles();
+        var files = await inspector.mergedFiles();
         var filteredList = Command.filterByCursor(files, cursorId, _lodash2.default.last);
         await doMigrations(db, filteredList, false);
         return filteredList;
