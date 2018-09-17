@@ -1,7 +1,9 @@
 {
-  "name": "goose",
-  "version": "0.1.0",
+  "name": "goose.js",
+  "version": "0.1.1",
   "description": "CLI command for database migration",
+  "keywords":["goose", "goose.js", "database", "migration", "mysql", "sqlite",
+    "postgres", "mkante"],
   "bin": {
     "goose.js": "./dist/index.js"
   },
