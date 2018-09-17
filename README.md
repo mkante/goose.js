@@ -220,17 +220,6 @@ Specifying 0 as the target version will revert all migrations.
 $ goose.js rollback -e development -t 0
 ```
 
-To rollback all migrations to a specific date then use:
-
-```Bash
-$ goose.js down -e development -t 2012
-$ goose.js down -e development -t 201201
-$ goose.js down -e development -t 20120103
-$ goose.js down -e development -t 2012010312
-$ goose.js down -e development -t 201201031205
-$ goose.js down -e development -t 20120103120530
-```
-
 ##### Status command
 The Status command prints a list of all migrations, along with their current status. You can use this command to determine which migrations have been run.
 
